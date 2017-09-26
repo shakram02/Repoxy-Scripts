@@ -11,7 +11,7 @@ defaults = {
     "proxy_ip": "192.168.1.248",
     "proxy_port": "6833",
     "switch_count": "8",
-    "hosts_per_switch": "3",
+    "hosts_per_switch": "2",
 }
 
 
@@ -25,7 +25,7 @@ def try_get_arg(index, key):
 
 def create_network():
     proxy_ip = try_get_arg(1, "proxy_ip")
-    proxy_port = try_get_arg(2, "proxy_port")
+    proxy_port = int(try_get_arg(2, "proxy_port"))
     switch_count = int(try_get_arg(3, "switch_count"))
     hosts_per_switch = int(try_get_arg(4, "hosts_per_switch"))
 
