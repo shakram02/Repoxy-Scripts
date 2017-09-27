@@ -20,14 +20,11 @@ def send_to_all(socket_list, command):
         so.send(command)
 
 
-def close_sockets(socket_list):
-    for so in socket_list:
-        so.close()
-
-
 def terminate_gracefully(socket_list):
     send_to_all(socket_list, EXIT_COMMAND)
-    close_sockets(socket_list)
+    for so in socket_list:
+        so.shutdown(socket.SHUT_RDWR)
+        so.close()
 
 
 def send_command(command, socket_list):
