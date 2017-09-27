@@ -45,6 +45,9 @@ def start_tcp_messenger(ip, port):
 
 
 def stop_tcp_messenger(controller_id, socket):
+    import time
+    time.sleep(1)
+    # Make sure that this message isn't sent with any other
     _send_to_receiver(EXIT_COMMAND, controller_id, socket)
 
 
