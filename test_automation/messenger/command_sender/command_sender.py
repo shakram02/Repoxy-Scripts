@@ -30,17 +30,13 @@ def terminate_gracefully(socket_list):
     close_sockets(socket_list)
 
 
-def send_to_receiver(s, command):
-    s.send(command)
-
-
 def send_command(command, socket_list):
     splits = command.split(' ')
 
     if len(splits) == 2:
         command = splits[0]
         index = int(splits[1])
-        send_to_receiver(socket_list[index], command)
+        socket_list[index].send(command)
     elif len(splits) == 1:
         send_to_all(socket_list, command)
     else:
