@@ -20,12 +20,12 @@ def launch_controller(ip, port):
     import os
 
     print "[Opening POX]"
-    import poxer
-    poxer.run_pox()
+    import pox_runner
+    pox_runner.run_pox()
     time.sleep(5)
 
     print "[Killing POX]"
-    poxer.pox_quit()
+    pox_runner.pox_quit()
 
     # user_path = os.path.expanduser("~")
     # args = "sudo python {}".format(user_path) + \
