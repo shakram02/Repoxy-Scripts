@@ -11,7 +11,6 @@ class PoxRunner:
                            " info.packet_dump samples.pretty_log log.level --DEBUG")
 
     def run_pox(self):
-        print self.command
         self._process = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
 
     def quit_pox(self):

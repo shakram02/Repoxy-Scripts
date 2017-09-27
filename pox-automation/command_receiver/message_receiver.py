@@ -5,9 +5,13 @@ OPEN_SOCKETS = []
 MESSENGER_PORT_BASE = 6930
 CONTROLLER_PORT_BASE = 6830
 
-WHITE_BACKGROUND = "\033[47m"
-RED_BOLD_BRIGHT = "\033[1;91m"
+BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
+WHITE_BOLD = "\033[1;37m"
 RESET = "\033[0m"
+
+
+def log(string):
+    print "{}{}[{}]{}".format(BLUE_BACKGROUND_BRIGHT, WHITE_BOLD, string, RESET)
 
 
 def get_bind_address_info(machine_number):
@@ -20,16 +24,16 @@ def get_bind_address_info(machine_number):
 def test_controller_launch(ip, port):
     import time
 
-    print "[Opening POX]"
+    log("Launching POX")
 
     component = "l2_all_to_controller"
     runner = PoxRunner(ip, port, component)
     runner.run_pox()
     time.sleep(2)
 
-    print "{}{}[Killing POX]{}".format(WHITE_BACKGROUND, RED_BOLD_BRIGHT, RESET)
+    log("Killing POX")
     runner.quit_pox()
-    print "{}{}[POX is now down]{}".format(WHITE_BACKGROUND, RED_BOLD_BRIGHT, RESET)
+    log("POX is now down")
 
 
 def get_machine_number():
