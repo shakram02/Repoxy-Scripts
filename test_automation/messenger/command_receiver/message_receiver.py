@@ -73,6 +73,10 @@ def main():
     while True:
         # Convert data to string, we don't need binary tides
         data = str(client_sock.recv(64)).strip()
+
+        if len(data) == 0:
+            break
+
         print 'Received {}'.format(data)
 
         if data == "EXIT" or len(data) == 0:
