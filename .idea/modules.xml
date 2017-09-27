@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/of-DimensionalGate-Scripts.iml" filepath="$PROJECT_DIR$/.idea/of-DimensionalGate-Scripts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/of_DimensionalGate_Scripts.iml" filepath="$PROJECT_DIR$/.idea/of_DimensionalGate_Scripts.iml" />
     </modules>
   </component>
 </project>
