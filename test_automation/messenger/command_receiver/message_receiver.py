@@ -47,7 +47,6 @@ def get_machine_number():
 
 def create_and_start_listener_socket(ip, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     server.bind((ip, port))
     server.listen(1)
@@ -56,6 +55,8 @@ def create_and_start_listener_socket(ip, port):
 
 
 def main():
+    global OPEN_SOCKETS
+
     machine_number = get_machine_number()
 
     ip = '192.168.1.24{}'.format(machine_number)
@@ -93,8 +94,12 @@ def main():
             pox_wrapper.kill_controller()
             log("POX is now down")
 
-    client_sock.close()
+    log('Closing sockets')
+    server.shutdown(socket.SHUT_RDWR)
     server.close()
+    client_sock.shutdown(socket.SHUT_RDWR)
+    client_sock.close()
+    log('Sockets closed')
 
 
 if __name__ == "__main__":
@@ -104,7 +109,7 @@ if __name__ == "__main__":
 
         sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
         main()
-    except KeyboardInterrupt:
+    finally:
         # Close all open sockets
         for s in OPEN_SOCKETS:
             s.close()
