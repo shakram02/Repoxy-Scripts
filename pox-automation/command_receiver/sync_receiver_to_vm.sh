@@ -6,4 +6,4 @@ if [ "$#" -ne 1 ];then
 fi
 
 ip="192.168.1.2$1"
-rsync -ravI ssh . "mn0@$ip:/home/mn0/px/command_receiver/"
+rsync -ravI ssh . "mn0@$ip:/home/mn0/px/pox-automation/command_receiver/"
