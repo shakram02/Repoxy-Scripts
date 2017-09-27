@@ -1,9 +1,13 @@
 import socket
-import sys
+from pox_runner import PoxRunner
 
 OPEN_SOCKETS = []
 MESSENGER_PORT_BASE = 6930
 CONTROLLER_PORT_BASE = 6830
+
+WHITE_BACKGROUND = "\033[47m"
+RED_BOLD_BRIGHT = "\033[1;91m"
+RESET = "\033[0m"
 
 
 def get_bind_address_info(machine_number):
@@ -13,32 +17,19 @@ def get_bind_address_info(machine_number):
     return ip, port
 
 
-def launch_controller(ip, port):
-    import shlex
-    import subprocess
+def test_controller_launch(ip, port):
     import time
-    import os
 
     print "[Opening POX]"
-    import pox_runner
-    pox_runner.run_pox()
-    time.sleep(5)
 
-    print "[Killing POX]"
-    pox_runner.pox_quit()
+    component = "l2_all_to_controller"
+    runner = PoxRunner(ip, port, component)
+    runner.run_pox()
+    time.sleep(2)
 
-    # user_path = os.path.expanduser("~")
-    # args = "sudo python {}".format(user_path) + \
-    #        "/pox/pox.py openflow.of_01 --address={} ".format(ip) + \
-    #        "--port={} l2_all_to_controller info.packet_dump samples.pretty_log log.level --DEBUG".format(port)
-    #
-    # print "[Args]\n {} \n".format(args)
-    # p = subprocess.Popen(args, shell=True)
-    # print "[Will Kill]"
-    # import signal
-    # p.send_signal(signal.SIGTERM)
-    # p.wait()
-    # print "[Killed]"
+    print "{}{}[Killing POX]{}".format(WHITE_BACKGROUND, RED_BOLD_BRIGHT, RESET)
+    runner.quit_pox()
+    print "{}{}[POX is now down]{}".format(WHITE_BACKGROUND, RED_BOLD_BRIGHT, RESET)
 
 
 def get_machine_number():
@@ -86,7 +77,7 @@ def main():
         if data != "EXEC":
             continue
 
-        launch_controller(ip, controller_port)
+        test_controller_launch(ip, controller_port)
 
     client_sock.close()
     server.close()
@@ -94,9 +85,9 @@ def main():
 
 try:
     import os
+    import sys
 
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
-
     main()
 except KeyboardInterrupt:
     # Close all open sockets
