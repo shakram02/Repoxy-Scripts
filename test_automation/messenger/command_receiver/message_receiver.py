@@ -75,7 +75,7 @@ def main():
         data = str(client_sock.recv(64)).strip()
         print 'Received {}'.format(data)
 
-        if data == "EXIT":
+        if data == "EXIT" or len(data) == 0:
             break
 
         if data != "EXEC":
