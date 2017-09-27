@@ -51,3 +51,5 @@ try:
 except KeyboardInterrupt:
     if network is not None:
         network.stop()
+finally:
+    clean.cleanup()
