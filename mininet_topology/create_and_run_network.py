@@ -36,20 +36,21 @@ def create_network():
     return net
 
 
-network = None
-try:
-    clean.cleanup()
-    setLogLevel('info')
-    network = create_network()
-    network.start()
+if __name__ == "__main__":
+    network = None
+    try:
+        clean.cleanup()
+        setLogLevel('info')
+        network = create_network()
+        network.start()
 
-    print "[Showing connections]"
-    dumpNodeConnections(network.hosts)
-    print "[Testing network]"
-    network.pingAll()
-    network.stop()
-except KeyboardInterrupt:
-    if network is not None:
+        print "[Showing connections]"
+        dumpNodeConnections(network.hosts)
+        print "[Testing network]"
+        network.pingAll()
         network.stop()
-finally:
-    clean.cleanup()
+    except KeyboardInterrupt:
+        if network is not None:
+            network.stop()
+    finally:
+        clean.cleanup()

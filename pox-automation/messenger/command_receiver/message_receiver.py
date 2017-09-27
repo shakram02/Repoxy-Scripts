@@ -87,13 +87,14 @@ def main():
     server.close()
 
 
-try:
-    import os
-    import sys
+if __name__ == "__main__":
+    try:
+        import os
+        import sys
 
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
-    main()
-except KeyboardInterrupt:
-    # Close all open sockets
-    for s in OPEN_SOCKETS:
-        s.close()
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
+        main()
+    except KeyboardInterrupt:
+        # Close all open sockets
+        for s in OPEN_SOCKETS:
+            s.close()
