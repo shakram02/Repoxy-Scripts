@@ -30,19 +30,19 @@ def terminate_gracefully(socket_list):
     close_sockets(socket_list)
 
 
-def send_to_receiver(index, command):
-    sockets[index].send(command)
+def send_to_receiver(s, command):
+    s.send(command)
 
 
-def send_command(command):
+def send_command(command, socket_list):
     splits = command.split(' ')
 
     if len(splits) == 2:
         command = splits[0]
         index = int(splits[1])
-        send_to_receiver(index, command)
+        send_to_receiver(socket_list[index], command)
     elif len(splits) == 1:
-        send_to_all(sockets, command)
+        send_to_all(socket_list, command)
     else:
         print "[Invalid input]"
 
@@ -55,7 +55,7 @@ def main(socket_list):
             terminate_gracefully(socket_list)
             break
 
-        send_command(command)
+        send_command(command, socket_list)
 
 
 if __name__ == "__main__":
