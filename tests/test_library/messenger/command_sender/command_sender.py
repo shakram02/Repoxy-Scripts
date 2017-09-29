@@ -27,20 +27,11 @@ def terminate_gracefully(socket_list):
         so.close()
 
 
-def send_command(command, socket_list):
-    splits = command.split(' ')
-
+def send_command(command, receiver_socket):
     if not command.endswith("\n"):
         command = command + "\r\n"
 
-    if len(splits) == 2:
-        command = splits[0]
-        index = int(splits[1])
-        socket_list[index].send(command)
-    elif len(splits) == 1:
-        send_to_all(socket_list, command)
-    else:
-        print "[Invalid input]"
+    receiver_socket.send(command)
 
 
 def main(socket_list):
@@ -51,7 +42,13 @@ def main(socket_list):
             terminate_gracefully(socket_list)
             break
 
-        send_command(command, socket_list)
+        splits = command.split(' ')
+        if len(splits) == 2:
+            s_command = splits[0]
+            s_index = int(splits[1])
+            send_command(s_command, socket_list[s_index])
+        else:
+            [send_command(command, s) for s in socket_list]
 
 
 if __name__ == "__main__":
