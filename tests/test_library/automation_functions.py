@@ -24,31 +24,31 @@ def mininet_clean():
     clean.cleanup()
 
 
-def start_controller(controller_id, socket):
-    _send_to_receiver(LAUNCH_CONTROLLER_COMMAND, controller_id, socket)
+def start_controller(socket):
+    _send_to_receiver(LAUNCH_CONTROLLER_COMMAND, socket)
 
 
-def stop_controller(controller_id, socket):
-    _send_to_receiver(KILL_CONTROLLER_COMMAND, controller_id, socket)
+def stop_controller(socket):
+    _send_to_receiver(KILL_CONTROLLER_COMMAND, socket)
 
 
 def create_tcp_messenger(ip, port):
     return create_client((ip, port))
 
 
-def stop_tcp_messenger(controller_id, socket):
+def stop_tcp_messenger(socket):
     import time
     time.sleep(1)
     # Make sure that this message isn't sent with any other
-    _send_to_receiver(EXIT_COMMAND, controller_id, socket)
+    _send_to_receiver(EXIT_COMMAND, socket)
 
 
 def ping_all(net):
     net.pingAll()
 
 
-def _send_to_receiver(command, controller_id, socket):
+def _send_to_receiver(command, socket):
     if type(socket) is list:
         raise TypeError("Should get a single socket")
 
-    send_command("{} {}".format(command, controller_id), [socket])
+    send_command("{}".format(command), socket)
