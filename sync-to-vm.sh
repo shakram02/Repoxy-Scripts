@@ -12,6 +12,4 @@ rsync -ravI ssh --exclude=".*"\
 ./controller-component/l2_all_to_controller.py \
 "mn0@$ip:/home/mn0/pox/ext/"
 
-rsync -ravI ssh  --exclude=".*" \
-./mininet_topology/ \
-"mn0@$ip:/home/mn0/px/mininet_topology/"
+rsync -ravI ssh  --exclude=".*" . "mn0@$ip:/home/mn0/px/$(basename "$PWD")/"
