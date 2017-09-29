@@ -28,7 +28,7 @@ def launch_controllers(client_sockets):
     _send_to_all_receivers(LAUNCH_CONTROLLER_COMMAND, client_sockets)
 
 
-def launch_controller(controller_id, socket):
+def start_controller(controller_id, socket):
     _send_to_receiver(LAUNCH_CONTROLLER_COMMAND, controller_id, socket)
 
 
@@ -40,7 +40,7 @@ def stop_controller(controller_id, socket):
     _send_to_receiver(KILL_CONTROLLER_COMMAND, controller_id, socket)
 
 
-def start_tcp_messenger(ip, port):
+def create_tcp_messenger(ip, port):
     return create_client((ip, port))
 
 

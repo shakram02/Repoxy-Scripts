@@ -79,7 +79,7 @@ def main():
 
         if len(data) == 0:
             break
-
+        # Splin by \r\n
         print 'Received {}'.format(data)
 
         if data == "EXIT":

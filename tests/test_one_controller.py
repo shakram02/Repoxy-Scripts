@@ -1,4 +1,4 @@
-from automation_functions import *
+from test_automation.automation_functions import *
 
 
 def main():
@@ -7,8 +7,8 @@ def main():
     controller_port = 6834
     controller_id = 0
 
-    client_socket = start_tcp_messenger(ip, messenger_port)
-    launch_controller(controller_id, client_socket)
+    client_socket = create_tcp_messenger(ip, messenger_port)
+    start_controller(controller_id, client_socket)
 
     network = create_network(proxy_ip=ip, proxy_port=controller_port, switch_count=3)
     start_network(network)

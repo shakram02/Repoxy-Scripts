@@ -1,7 +1,7 @@
 import socket
 
-# receivers = [("192.168.1.244", 6934), ("192.168.1.245", 6935)]
-receivers = [("0.0.0.0", 6934), ("0.0.0.0", 6935)]
+receivers = [("192.168.1.244", 6934), ("192.168.1.245", 6935)]
+# receivers = [("0.0.0.0", 6934), ("0.0.0.0", 6935)]
 
 EXIT_COMMAND = "EXIT"
 KILL_CONTROLLER_COMMAND = "KILL"
@@ -29,6 +29,9 @@ def terminate_gracefully(socket_list):
 
 def send_command(command, socket_list):
     splits = command.split(' ')
+
+    if not command.endswith("\n"):
+        command = command + "\r\n"
 
     if len(splits) == 2:
         command = splits[0]
