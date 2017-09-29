@@ -24,16 +24,8 @@ def mininet_clean():
     clean.cleanup()
 
 
-def launch_controllers(client_sockets):
-    _send_to_all_receivers(LAUNCH_CONTROLLER_COMMAND, client_sockets)
-
-
 def start_controller(controller_id, socket):
     _send_to_receiver(LAUNCH_CONTROLLER_COMMAND, controller_id, socket)
-
-
-def stop_controllers(client_sockets):
-    _send_to_all_receivers(KILL_CONTROLLER_COMMAND, client_sockets)
 
 
 def stop_controller(controller_id, socket):
@@ -60,11 +52,3 @@ def _send_to_receiver(command, controller_id, socket):
         raise TypeError("Should get a single socket")
 
     send_command("{} {}".format(command, controller_id), [socket])
-
-
-def _send_to_all_receivers(command, sockets):
-    if type(sockets) is not list:
-        raise TypeError("Should get a list of sockets")
-
-    for (i, s) in enumerate(sockets):
-        _send_to_receiver(command, i, s)
