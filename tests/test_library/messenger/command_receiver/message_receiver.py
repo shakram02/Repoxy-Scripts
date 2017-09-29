@@ -28,10 +28,14 @@ class PoxWrapper:
         self.runner = PoxRunner(ip, port, component)
 
     def launch_controller(self):
+        if self.running is True:
+            return
         self.runner.run_pox()
         self.running = True
 
     def kill_controller(self):
+        if self.running is False:
+            return
         self.runner.quit_pox()
         self.running = False
 
@@ -39,7 +43,7 @@ class PoxWrapper:
 def get_machine_number():
     try:
         # 4 or 5
-        return sys.argv[1]
+        return int(sys.argv[1])
     except IndexError:
         print "[Fallback to default machine number {4}]"
         return 4
@@ -94,6 +98,8 @@ def main():
             pox_wrapper.kill_controller()
             log("POX is now down")
 
+    log("Killing POX on termination")
+    pox_wrapper.kill_controller()
     log('Closing sockets')
     server.shutdown(socket.SHUT_RDWR)
     server.close()
