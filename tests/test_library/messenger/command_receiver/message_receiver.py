@@ -51,11 +51,22 @@ def get_machine_number():
 
 def create_and_start_listener_socket(ip, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((ip, port))
     server.listen(1)
 
     return server
+
+
+def clean_up(pox_wrapper, server, client_sock):
+    log("Killing POX on termination")
+    pox_wrapper.kill_controller()
+    log('Closing sockets')
+    server.shutdown(socket.SHUT_RDWR)
+    server.close()
+    client_sock.shutdown(socket.SHUT_RDWR)
+    client_sock.close()
+    log('Sockets closed')
 
 
 def main():
@@ -98,14 +109,7 @@ def main():
             pox_wrapper.kill_controller()
             log("POX is now down")
 
-    log("Killing POX on termination")
-    pox_wrapper.kill_controller()
-    log('Closing sockets')
-    server.shutdown(socket.SHUT_RDWR)
-    server.close()
-    client_sock.shutdown(socket.SHUT_RDWR)
-    client_sock.close()
-    log('Sockets closed')
+    clean_up(pox_wrapper, server, client_sock)
 
 
 if __name__ == "__main__":
