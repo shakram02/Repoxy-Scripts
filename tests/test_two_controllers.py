@@ -10,7 +10,7 @@ def main():
     main_controller.start_controller()
 
     import time
-    time.sleep(3)  # Give the controller 3 seconds to start
+    time.sleep(0.3)  # Give the controller 300ms to start
 
     network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=3)
 
