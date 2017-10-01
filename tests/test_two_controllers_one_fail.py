@@ -9,10 +9,13 @@ def main():
     cloned_controller.start_controller()
     main_controller.start_controller()
 
+    import time
+    time.sleep(0.5)
 
     network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=3)
 
     start_network(network)
+    main_controller.stop_controller()
     ping_all(network)
     stop_network(network)
 

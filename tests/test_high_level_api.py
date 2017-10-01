@@ -6,8 +6,13 @@ def main():
 
     test_obj.start_controllers()
 
-    test_obj.create_and_start_network()
+    import time
+    time.sleep(0.5)
+
+    test_obj.create_network()
+    test_obj.start_network()
     test_obj.ping_all()
+
     test_obj.stop_network()
 
     test_obj.stop_controllers()
