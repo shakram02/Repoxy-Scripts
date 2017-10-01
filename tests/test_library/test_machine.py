@@ -28,6 +28,12 @@ class TestMachine:
         af.stop_controller(self.messenger_socket)
         self._controller_launched = False
 
+    def kill_controller(self):
+        if not self._controller_launched:
+            return
+        af.kill_controller(self.messenger_socket)
+        self._controller_launched = False
+
     def _stop_messenger(self):
         af.stop_tcp_messenger(self.messenger_socket)
         self._controller_launched = False

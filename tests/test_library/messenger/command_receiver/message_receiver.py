@@ -1,5 +1,6 @@
 import socket
 from pox_runner import PoxRunner
+from protocol_messages import *
 
 OPEN_SOCKETS = []
 MESSENGER_PORT_BASE = 6930
@@ -33,10 +34,16 @@ class PoxWrapper:
         self.runner.run_pox()
         self.running = True
 
+    def shutdown_controller(self):
+        if self.running is False:
+            return
+        self.runner.shutdown_pox()
+        self.running = False
+
     def kill_controller(self):
         if self.running is False:
             return
-        self.runner.quit_pox()
+        self.runner.kill_pox()
         self.running = False
 
 
@@ -51,11 +58,41 @@ def get_machine_number():
 
 def create_and_start_listener_socket(ip, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((ip, port))
     server.listen(1)
 
     return server
+
+
+def clean_up(pox_wrapper, server, client_sock):
+    log("Killing POX on termination")
+    pox_wrapper.shutdown_controller()
+    log('Closing sockets')
+    server.shutdown(socket.SHUT_RDWR)
+    server.close()
+    client_sock.shutdown(socket.SHUT_RDWR)
+    client_sock.close()
+    log('Sockets closed')
+
+
+def proto_process(item, pox_wrapper):
+    # Split by \r\n
+    print 'Received {}'.format(item)
+
+    if item == PROTO_LAUNCH:
+        log("Launching POX")
+        pox_wrapper.launch_controller()
+
+    elif item == PROTO_SHUT_DOWN:
+        log("Shutting down POX")
+        pox_wrapper.shutdown_controller()
+        log("POX is now down")
+
+    elif item == PROTO_KILL:
+        log("Killing POX")
+        pox_wrapper.kill_controller()
+        log("Done")
 
 
 def main():
@@ -76,36 +113,27 @@ def main():
     log('Accepted connection from {}:{}'.format(address[0], address[1]))
 
     pox_wrapper = PoxWrapper(ip, controller_port)
+    terminated = False
 
-    while True:
+    while not terminated:
         # Convert data to string, we don't need binary tides
         data = str(client_sock.recv(64)).strip()
 
         if len(data) == 0:
             break
-        # Splin by \r\n
-        print 'Received {}'.format(data)
 
-        if data == "EXIT":
-            break
+        data = data.split('\r\n')
 
-        elif data == "EXEC":
-            log("Launching POX")
-            pox_wrapper.launch_controller()
+        for item in data:
+            item = item.strip().upper()
 
-        elif data == "KILL":
-            log("Killing POX")
-            pox_wrapper.kill_controller()
-            log("POX is now down")
+            if item is PROTO_EXIT:
+                terminated = True
+                break
 
-    log("Killing POX on termination")
-    pox_wrapper.kill_controller()
-    log('Closing sockets')
-    server.shutdown(socket.SHUT_RDWR)
-    server.close()
-    client_sock.shutdown(socket.SHUT_RDWR)
-    client_sock.close()
-    log('Sockets closed')
+            proto_process(item, pox_wrapper)
+
+    clean_up(pox_wrapper, server, client_sock)
 
 
 if __name__ == "__main__":

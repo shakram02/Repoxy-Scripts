@@ -13,7 +13,12 @@ class PoxRunner:
     def run_pox(self):
         self._process = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
 
-    def quit_pox(self):
+    def shutdown_pox(self):
         import signal
         os.killpg(os.getpgid(self._process.pid), signal.SIGINT)
+        self._process.wait()
+
+    def kill_pox(self):
+        import signal
+        os.killpg(os.getpgid(self._process.pid), signal.SIGKILL)
         self._process.wait()
