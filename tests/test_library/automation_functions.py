@@ -28,6 +28,10 @@ def start_controller(socket):
     _send_to_receiver(PROTO_LAUNCH, socket)
 
 
+def kill_controller(socket):
+    _send_to_receiver(PROTO_KILL, socket)
+
+
 def stop_controller(socket):
     _send_to_receiver(PROTO_SHUT_DOWN, socket)
 
