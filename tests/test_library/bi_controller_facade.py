@@ -17,18 +17,20 @@ class BiControllerFacade:
         self._log("Starting controllers")
         self.cloned_controller.start_controller()
         self.main_controller.start_controller()
-        self._log("Giving sometime for controllers to start")
-        import time
-        time.sleep(0.3)  # Give the controller 300ms to start
-        self._log("Done waiting")
 
     def stop_controllers(self):
         self.cloned_controller.stop_controller()
         self.main_controller.stop_controller()
         self._log("Stopped controllers")
 
-    def create_and_start_network(self):
+    def kill_main_after(self, time_ms):
+        # TODO launch a task to KILL the controller (not shutdown)
+        pass
+
+    def create_network(self):
         self.network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=3)
+
+    def start_network(self):
         start_network(self.network)
 
     def stop_network(self):
