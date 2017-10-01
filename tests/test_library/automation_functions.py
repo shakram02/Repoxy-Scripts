@@ -1,7 +1,7 @@
 from mininet_topology.create_and_run_network import create_network, dumpNodeConnections
 from mininet import clean
-from messenger.command_sender.command_sender import create_client, send_command
-from messenger.command_sender.command_sender import KILL_CONTROLLER_COMMAND, LAUNCH_CONTROLLER_COMMAND, EXIT_COMMAND
+from messenger.command_sender.message_sender import create_client, send_command
+from messenger.command_receiver.protocol_messages import *
 
 
 def create_mininet_network():
@@ -25,22 +25,19 @@ def mininet_clean():
 
 
 def start_controller(socket):
-    _send_to_receiver(LAUNCH_CONTROLLER_COMMAND, socket)
+    _send_to_receiver(PROTO_LAUNCH, socket)
 
 
 def stop_controller(socket):
-    _send_to_receiver(KILL_CONTROLLER_COMMAND, socket)
+    _send_to_receiver(PROTO_SHUT_DOWN, socket)
+
+
+def stop_tcp_messenger(socket):
+    _send_to_receiver(PROTO_EXIT, socket)
 
 
 def create_tcp_messenger(ip, port):
     return create_client((ip, port))
-
-
-def stop_tcp_messenger(socket):
-    import time
-    time.sleep(1)
-    # Make sure that this message isn't sent with any other
-    _send_to_receiver(EXIT_COMMAND, socket)
 
 
 def ping_all(net):
