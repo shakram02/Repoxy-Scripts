@@ -24,8 +24,7 @@ class BiControllerFacade:
         self._log("Stopped controllers")
 
     def kill_main_after(self, time_ms):
-        # TODO launch a task to KILL the controller (not shutdown)
-        pass
+        self.main_controller.kill_main_controller_after(time_ms / 1000)
 
     def create_network(self):
         self.network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=3)
