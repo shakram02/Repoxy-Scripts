@@ -38,6 +38,9 @@ class BiControllerFacade:
     def ping_all(self):
         ping_all(self.network)
 
+    def run_on_host(self, prog, host_name):
+        return self.network.get(host_name).cmd(prog)
+
     def end_test(self):
         self.main_controller.shutdown()
         self.cloned_controller.shutdown()
