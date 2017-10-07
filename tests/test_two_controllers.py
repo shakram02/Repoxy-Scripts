@@ -9,7 +9,6 @@ def main():
     cloned_controller.start_controller()
     main_controller.start_controller()
 
-
     network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=3)
 
     start_network(network)
