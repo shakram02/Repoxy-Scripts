@@ -12,10 +12,10 @@ def main():
     import time
     time.sleep(0.5)
 
-    network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=3)
+    network = create_network(proxy_ip="192.168.1.248", proxy_port=6833)
 
     start_network(network)
-    main_controller.kill_controller()
+    main_controller.kill_main_controller_after(1.5)
     ping_all(network)
     stop_network(network)
 

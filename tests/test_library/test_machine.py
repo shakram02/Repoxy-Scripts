@@ -28,6 +28,11 @@ class TestMachine:
         af.stop_controller(self.messenger_socket)
         self._controller_launched = False
 
+    def kill_main_controller_after(self, seconds):
+        from threading import Timer
+        t = Timer(seconds, self.kill_controller)
+        t.start()
+
     def kill_controller(self):
         if not self._controller_launched:
             return
