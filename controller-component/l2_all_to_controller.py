@@ -41,6 +41,10 @@ table = {}
 # it selectable.
 all_ports = of.OFPP_FLOOD
 
+# Socket sending feedback to test manager
+to_test_manager = None
+sent_ready = False
+
 
 # Handle messages the switch has sent us because it has no
 # matching rule.
@@ -50,14 +54,48 @@ def _handle_PacketIn(event):
     # Learn the source
     table[(event.connection, packet.src)] = event.port
 
-    dst_port = table.get((event.connection, packet.dst))
+    # dst_port = table.get((event.connection, packet.dst))
 
     # send the packet out all ports (except the one it came in on!)
     # and hope the destination is out there somewhere. :)
     msg = of.ofp_packet_out(data=event.ofp)
     msg.actions.append(of.ofp_action_output(port=all_ports))
     event.connection.send(msg)
+
+    if not sent_ready:
+        send_ready()
+
     log.debug("Forwarding %s <-> %s" % (packet.src, packet.dst))
+
+
+def connect_to_test_manager():
+    global to_test_manager
+    # Open TCP connection to vm 101
+    # Send the ready message
+    from socket import socket, AF_INET, SOCK_STREAM
+    test_manager_ip = "192.168.1.241"
+    test_manager_port = 6931
+
+    to_test_manager = socket(AF_INET, SOCK_STREAM)
+
+    try:
+        to_test_manager.connect((test_manager_ip, test_manager_port))
+        log.debug("Connected to : " + test_manager_ip)
+    except Exception as e:
+        log.info("Couldn't connect to test manager" + str(e))
+        to_test_manager.close()
+        return False
+
+    return True
+
+
+def send_ready():
+    global sent_ready
+    message = "UP"
+
+    to_test_manager.send(message.encode())
+    to_test_manager.close()
+    sent_ready = True
 
 
 def launch(disable_flood=False):
@@ -65,6 +103,13 @@ def launch(disable_flood=False):
     if disable_flood:
         all_ports = of.OFPP_ALL
 
-    core.openflow.addListenerByName("PacketIn", _handle_PacketIn)
+    connected = connect_to_test_manager()
+    # Even a simple usage of the logger is much nicer than print!
+    log = core.getLogger()
 
-    log.debug("Forwarding switch running.")
+    if connected:
+        core.openflow.addListenerByName("PacketIn", _handle_PacketIn)
+        log.warn("Forwarding switch running.")
+        log.info("Make sure that this component is running on the main controller FGS")
+    else:
+        log.warn("Failed to connect to test manager, Forwarding switch won't run")
