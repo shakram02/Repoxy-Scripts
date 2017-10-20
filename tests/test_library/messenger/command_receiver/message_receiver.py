@@ -1,52 +1,12 @@
 import socket
 from pox_runner import PoxRunner
 from protocol_messages import *
+from misc import colorize
+from logging import basicConfig, DEBUG, getLogger, debug, error
 
 OPEN_SOCKETS = []
 MESSENGER_PORT_BASE = 6930
 CONTROLLER_PORT_BASE = 6830
-
-BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
-WHITE_BOLD = "\033[1;37m"
-RESET = "\033[0m"
-
-pox_manager = None
-
-
-def log(string):
-    print "{}{}[{}]{}".format(BLUE_BACKGROUND_BRIGHT, WHITE_BOLD, string, RESET)
-
-
-def get_bind_address_info(machine_number):
-    # TODO: don't hardcode, create config file
-    ip = '192.168.1.24{}'.format(machine_number)
-    port = MESSENGER_PORT_BASE + int(machine_number)
-    return ip, port
-
-
-class PoxWrapper:
-    def __init__(self, ip, port):
-        self.running = False
-        component = "l2_all_to_controller"
-        self.runner = PoxRunner(ip, port, component)
-
-    def launch_controller(self):
-        if self.running is True:
-            return
-        self.runner.run_pox()
-        self.running = True
-
-    def shutdown_controller(self):
-        if self.running is False:
-            return
-        self.runner.shutdown_pox()
-        self.running = False
-
-    def kill_controller(self):
-        if self.running is False:
-            return
-        self.runner.kill_pox()
-        self.running = False
 
 
 def get_machine_number():
@@ -60,7 +20,7 @@ def get_machine_number():
 
 def create_and_start_listener_socket(ip, port):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((ip, port))
     server.listen(1)
 
@@ -68,53 +28,44 @@ def create_and_start_listener_socket(ip, port):
 
 
 def clean_up(pox_wrapper, server, client_sock):
-    log("Killing POX on termination")
+    debug(colorize("Killing POX on termination"))
     pox_wrapper.shutdown_controller()
-    log('Closing sockets')
-    server.shutdown(socket.SHUT_RDWR)
-    server.close()
-    client_sock.shutdown(socket.SHUT_RDWR)
+    debug(colorize('Closing sockets'))
     client_sock.close()
-    log('Sockets closed')
+    server.close()
+    debug(colorize('Sockets closed'))
 
 
-def proto_process(item, pox_wrapper):
+def proto_process(item, controller_manager):
     # Split by \r\n
     print 'Received {}'.format(item)
 
     if item == PROTO_LAUNCH:
-        log("Launching POX")
-        pox_wrapper.launch_controller()
+        debug(colorize("Launching POX"))
+        controller_manager.launch_controller()
 
     elif item == PROTO_SHUT_DOWN:
-        log("Shutting down POX")
-        pox_wrapper.shutdown_controller()
-        log("POX is now down")
+        debug(colorize("Shutting down POX"))
+        controller_manager.shutdown_controller()
+        debug(colorize("POX is now down"))
 
     elif item == PROTO_KILL:
-        log("Killing POX")
-        pox_wrapper.kill_controller()
-        log("Done")
+        debug(colorize("Killing POX"))
+        controller_manager.kill_controller()
+        debug(colorize("Killed POX"))
 
 
 def main():
     global OPEN_SOCKETS
-    global pox_manager
-    machine_number = get_machine_number()
-
-    ip = '192.168.1.24{}'.format(machine_number)
-    messenger_bind_port = MESSENGER_PORT_BASE + int(machine_number)
-    controller_port = CONTROLLER_PORT_BASE + machine_number
 
     server = create_and_start_listener_socket(ip, messenger_bind_port)
     OPEN_SOCKETS.append(server)
 
-    log('Listening on {}:{}'.format(ip, messenger_bind_port))
+    debug(colorize('Listening on {}:{}'.format(ip, messenger_bind_port)))
     client_sock, address = server.accept()
     OPEN_SOCKETS.append(client_sock)
-    log('Accepted connection from {}:{}'.format(address[0], address[1]))
+    debug(colorize('Accepted connection from {}:{}'.format(address[0], address[1])))
 
-    pox_manager = pox_wrapper = PoxWrapper(ip, controller_port)
     terminated = False
 
     while not terminated:
@@ -129,25 +80,34 @@ def main():
         for item in data:
             item = item.strip().upper()
 
+            proto_process(item, pox_runner)
+
             if item is PROTO_EXIT:
                 terminated = True
                 break
 
-            proto_process(item, pox_wrapper)
-
-    clean_up(pox_wrapper, server, client_sock)
-
 
 if __name__ == "__main__":
-    try:
-        import os
-        import sys
 
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
+    import os
+    import sys
+
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
+    basicConfig(level=DEBUG)
+    logger = getLogger(__name__)
+    machine_number = get_machine_number()
+
+    ip = '192.168.1.24{}'.format(machine_number)
+    messenger_bind_port = MESSENGER_PORT_BASE + int(machine_number)
+    controller_port = CONTROLLER_PORT_BASE + machine_number
+    pox_runner = PoxRunner(ip, controller_port)
+
+    try:
         main()
-    finally:
-        if pox_manager is not None:
-            pox_manager.shutdown_controller()
+    except Exception as e:
+        error(e)
+
+        pox_runner.kill_controller()
         # Close all open sockets
         for s in OPEN_SOCKETS:
             s.close()

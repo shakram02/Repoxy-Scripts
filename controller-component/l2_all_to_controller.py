@@ -45,6 +45,7 @@ all_ports = of.OFPP_FLOOD
 to_test_manager = None
 sent_ready = False
 
+from pox.lib.packet.ethernet import ethernet
 
 # Handle messages the switch has sent us because it has no
 # matching rule.
@@ -62,7 +63,7 @@ def _handle_PacketIn(event):
     msg.actions.append(of.ofp_action_output(port=all_ports))
     event.connection.send(msg)
 
-    if not sent_ready:
+    if not sent_ready and packet.type != ethernet.ARP_TYPE:
         send_ready()
 
     log.debug("Forwarding %s <-> %s" % (packet.src, packet.dst))
@@ -105,7 +106,6 @@ def launch(disable_flood=False):
 
     connected = connect_to_test_manager()
     # Even a simple usage of the logger is much nicer than print!
-    log = core.getLogger()
 
     if connected:
         core.openflow.addListenerByName("PacketIn", _handle_PacketIn)
