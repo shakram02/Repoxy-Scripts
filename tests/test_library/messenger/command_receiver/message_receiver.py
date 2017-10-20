@@ -10,6 +10,8 @@ BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
 WHITE_BOLD = "\033[1;37m"
 RESET = "\033[0m"
 
+pox_manager = None
+
 
 def log(string):
     print "{}{}[{}]{}".format(BLUE_BACKGROUND_BRIGHT, WHITE_BOLD, string, RESET)
@@ -97,7 +99,7 @@ def proto_process(item, pox_wrapper):
 
 def main():
     global OPEN_SOCKETS
-
+    global pox_manager
     machine_number = get_machine_number()
 
     ip = '192.168.1.24{}'.format(machine_number)
@@ -112,7 +114,7 @@ def main():
     OPEN_SOCKETS.append(client_sock)
     log('Accepted connection from {}:{}'.format(address[0], address[1]))
 
-    pox_wrapper = PoxWrapper(ip, controller_port)
+    pox_manager = pox_wrapper = PoxWrapper(ip, controller_port)
     terminated = False
 
     while not terminated:
@@ -144,6 +146,8 @@ if __name__ == "__main__":
         sys.path.insert(0, os.path.abspath(os.path.join(os.path.expanduser("~"), 'pox')))
         main()
     finally:
+        if pox_manager is not None:
+            pox_manager.shutdown_controller()
         # Close all open sockets
         for s in OPEN_SOCKETS:
             s.close()

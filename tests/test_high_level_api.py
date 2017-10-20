@@ -1,4 +1,5 @@
 from test_library.bi_controller_facade import BiControllerFacade
+from test_library.automation_functions import mininet_clean
 
 
 def main():
@@ -19,4 +20,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        mininet_clean()
