@@ -15,6 +15,7 @@ class PoxRunner:
                            " --port={} {}".format(port, component) +
                            " info.packet_dump samples.pretty_log log.level --DEBUG")
         self._running = False
+        self._process = None
 
     def launch_controller(self):
         debug(colorize("Starting controller"))
@@ -22,11 +23,14 @@ class PoxRunner:
         debug(colorize("Controller started"))
 
     def shutdown_controller(self, timeout=_SHUTDOWN_TIMEOUT):
+        if self._process is None:
+            return
         os.killpg(os.getpgid(self._process.pid), signal.SIGINT)
 
         debug(colorize("Shutting down controller with [SIGINT]"))
         try:
             self._process.wait()
+            self._process = None
         except Exception as e:
             debug(colorize("An error occured while waiting the process to terminate:{}".format(e)))
 
