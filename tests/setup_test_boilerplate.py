@@ -93,28 +93,29 @@ class TestBoilerplate:
         if not controller_waiter.is_success:
             raise RuntimeError("Couldn't get controller connection")
 
-        self._feedback_listener = controller_waiter.listener
+        # self._feedback_listener = controller_waiter.listener
         self.network = create_network(proxy_ip="192.168.1.248", proxy_port=6833, switch_count=4)
         start_network(self.network)
 
         # Start feedback waiter
-        self.feedback_ready_event = Event()
+        # self.feedback_ready_event = Event()
 
     def do_test(self):
         raise NotImplementedError()
         pass
 
     def watch_for_message(self, on_completion):
-        started_event = Event()
-        self.message_waiter = FeedbackWaiter(self._feedback_listener, started_event, self.feedback_ready_event)
+        pass
+        # started_event = Event()
+        # self.message_waiter = FeedbackWaiter(self._feedback_listener, started_event, self.feedback_ready_event)
 
         # Pinging the network is blocking, and waiting for the controller is blocking also
         # there 2 processes need to be done on separate thereads
-        wait_thread = Thread(target=self.message_waiter.start, args=[on_completion])
-        wait_thread.setDaemon(True)
-        wait_thread.start()
-        started_event.wait()
-        debug("[Watcher launched]")
+        # wait_thread = Thread(target=self.message_waiter.start, args=[on_completion])
+        # wait_thread.setDaemon(True)
+        # wait_thread.start()
+        # started_event.wait()
+        # debug("[Watcher launched]")
 
     def wait_for_feedback_message(self, timeout=_CONNECTION_TIMEOUT):
         # Wait either for completion or timeout

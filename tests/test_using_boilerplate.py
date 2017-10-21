@@ -17,18 +17,10 @@ class TestKilling(TestBoilerplate):
         self.setup()
         # Test is now ready
 
-        # Those 2 operations are blocking, they need to be performed on separate threads
-        self.watch_for_message(self.on_receivce_feedback)
+        # Main controller will go down after first non-arp packet
         ping_all(self.network)
 
-        got_feedback = self.wait_for_feedback_message()
-
-        if not got_feedback:
-            logging.warn("[Failed to get controller feedback]")
-
         stop_network(self.network)
-
-        # self.main_controller.shutdown()
         self.cloned_controller.shutdown()
 
 
