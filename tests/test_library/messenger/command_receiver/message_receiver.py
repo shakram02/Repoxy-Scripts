@@ -46,12 +46,12 @@ def proto_process(item, controller_manager):
 
     elif item == PROTO_SHUT_DOWN:
         debug(colorize("Shutting down POX"))
-        controller_manager.shutdown_controller()
+        # controller_manager.shutdown_controller()
         debug(colorize("POX is now down"))
 
     elif item == PROTO_KILL:
         debug(colorize("Killing POX"))
-        controller_manager.kill_controller()
+        # controller_manager.kill_controller()
         debug(colorize("Killed POX"))
 
 
