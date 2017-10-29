@@ -45,10 +45,13 @@ all_ports = of.OFPP_FLOOD
 to_test_manager = None
 sent_ready = False
 
+from pox.lib.packet.ethernet import ethernet
+
 
 # Handle messages the switch has sent us because it has no
 # matching rule.
 def _handle_PacketIn(event):
+    global sent_ready
     packet = event.parsed
 
     # Learn the source
@@ -62,8 +65,9 @@ def _handle_PacketIn(event):
     msg.actions.append(of.ofp_action_output(port=all_ports))
     event.connection.send(msg)
 
-    if not sent_ready:
-        send_ready()
+    if not sent_ready and packet.type != ethernet.ARP_TYPE:
+        sent_ready = True
+        core.quit()
 
     log.debug("Forwarding %s <-> %s" % (packet.src, packet.dst))
 
@@ -81,9 +85,9 @@ def connect_to_test_manager():
     try:
         to_test_manager.connect((test_manager_ip, test_manager_port))
         log.debug("Connected to : " + test_manager_ip)
+        to_test_manager.close()
     except Exception as e:
         log.info("Couldn't connect to test manager" + str(e))
-        to_test_manager.close()
         return False
 
     return True
@@ -105,7 +109,7 @@ def launch(disable_flood=False):
 
     connected = connect_to_test_manager()
     # Even a simple usage of the logger is much nicer than print!
-    log = core.getLogger()
+    # core.openflow.addListenerByName("PacketIn", _handle_PacketIn)
 
     if connected:
         core.openflow.addListenerByName("PacketIn", _handle_PacketIn)
@@ -113,3 +117,4 @@ def launch(disable_flood=False):
         log.info("Make sure that this component is running on the main controller FGS")
     else:
         log.warn("Failed to connect to test manager, Forwarding switch won't run")
+        core.quit()
