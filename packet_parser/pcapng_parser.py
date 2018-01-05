@@ -1,5 +1,3 @@
-from scapy.layers.inet import IP, TCP
-from scapy.layers.l2 import rdpcap, Ether
 from scapy.utils import PcapReader
 
 from packet_parser.of_scapy import OpenFlow
@@ -9,7 +7,6 @@ def main():
     pcap = PcapReader('/mnt/Exec/code/research/ping-all.pcap')
 
     """
-
      Network 45306 -> Id [2]
         [ControllerRegion] ConnId [2] -> 48778 On controller
         [ReplicaRegion] ConnId [2] -> 38324 On controller
@@ -24,21 +21,22 @@ def main():
         6834: "Main Controller",
         6835: "Replicated Controller"
     }
+    custom_ports = ports.keys()
 
-    from scapy.packet import Raw
+    # Reads packets in PCAP file, packets are read as TCP
+    # because I'm using non-standard OpenFlow ports (default is 6653)
+    for packet in pcap.read_all():
+        flags = packet.sprintf('%TCP.flags%')
 
-    for a in pcap.read_all():
-        # print(a.__dict__)
-        # print(repr(a))
-        if isinstance(a.payload.payload, TCP):
-            if hasattr(a, 'load'):
-                of_packet = OpenFlow(a, a.load, ports.keys())
-                print(repr(of_packet))
+        # Ignore SYN, ACK only, FIN, RST packets
+        if any([x in ['S', 'F', 'R'] for x in flags]) or flags == "A":
+            # Ignore control packets
+            continue
 
-        # tcp_packet = TCP(a)
-        # a = OpenFlow(tcp_packet, tcp_packet.load, [6833, 6834, 6835])
-        # tcp_packet: TCP = a
-        # ip_packet: IP = tcp_packet.payload
+        # packet.load yields OF packet as bytes
+        of_packet = OpenFlow(packet, packet.load, custom_ports)
+
+        print(of_packet.name, "From", packet['IP'].src, "To", ports[packet['TCP'].dport])
 
 
 if __name__ == "__main__":
