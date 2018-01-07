@@ -41,23 +41,23 @@ def main():
     pcap = PcapReader('/mnt/Exec/code/research/ping-all.pcap')
 
     """
-     Network 45306 -> Id [2]
-        [ControllerRegion] ConnId [2] -> 48778 On controller
-        [ReplicaRegion] ConnId [2] -> 38324 On controller
-
-     Network 45308 -> Id [3]
-         [ControllerRegion] ConnId [3] -> 48782 On controller
-         [ReplicaRegion] ConnId [3] -> 38328 On controller
+     Network 33012 -> Id [2]
+        [ControllerRegion] ConnId [2] -> 34178 On controller
+        [ReplicaRegion] ConnId [2] -> 56438 On controller
+     
+     Network 33014 -> Id [3]
+        [ControllerRegion] ConnId [3] -> 34182 On controller
+        [ReplicaRegion] ConnId [3] -> 56442 On controller
     """
 
     con_ids = {
-        45306: 2,  # SRC
-        48778: 2,  # DST
-        38324: 2,  # DST
+        33012: 2,  # SRC
+        34178: 2,  # DST
+        56348: 2,  # DST
 
-        45308: 3,
-        48782: 3,
-        38328: 3
+        33014: 3,
+        34182: 3,
+        56442: 3
     }
 
     ports = {
@@ -65,6 +65,7 @@ def main():
         6834: "Main Controller",
         6835: "Replicated Controller"
     }
+    custom_ports = ports.keys()
 
     ips = {
         "192.168.1.244": "Main Controller",
@@ -75,19 +76,26 @@ def main():
 
     packet_list = filter_control_packets(pcap.read_all())
 
+    def get_id(sport, dport):
+        if sport in con_ids:
+            return con_ids[sport]
+        if dport in con_ids:
+            return con_ids[dport]
+
+        return False
+
     for packet in packet_list:
-        def get_id(sport, dport):
-            if sport in con_ids:
-                return con_ids[sport]
-            if dport in con_ids:
-                return con_ids[dport]
-            raise KeyError("Invalid port")
+        sport = packet['TCP'].sport
+        dport = packet['TCP'].dport
+
+        con_id = get_id(sport, dport)
+        if not con_id: continue  # Invalid first test socket that pox opens
 
         src = ips[packet['IP'].src]
-        dst = ports[packet['TCP'].dport]
-        con_id = get_id(packet['TCP'].sport, packet['TCP'].dport)
+        dst = ips[packet['IP'].dst]
 
-        print(packet.name, "From", src, "To", dst, "[{}]".format(con_id), " at", packet.time)
+        of_packet = OpenFlow(packet, packet.load, custom_ports)
+        print("[{}] [{}]".format(packet.time, of_packet.name), src, "-->", dst, "[{}]".format(con_id))
 
 
 if __name__ == "__main__":
