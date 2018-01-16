@@ -4,8 +4,8 @@ Scripts that make life easier in automation and benchmarking
 - Plots 
 - Test automation 
 - Forwarding controller component 
- 
-## Test automation 
+
+## Test automation
 A messenger sends commands from the mininet VM to the other VMs so that they
 execute and tear down the controller processes 
 The test bed contains at least 2 VMs both of which are mininet VMs. The first
@@ -19,3 +19,6 @@ To run the tests the simple wat
 the controller VM 
 3) launch `test_automation/test_one_controller.py` in the network VM 
 
+## Adding custom dissector
+I'm not using default wireshark ports, I edited the OF dissector for `Wireshark` a little bit
+to display correct results, use the edited dissector
