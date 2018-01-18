@@ -1,0 +1,17 @@
+image: themattrix/tox
+
+stages:
+  - static_check
+  - tests
+
+static_check:
+  stage: static_check
+  before_script:
+    - pip3.6 install -r requirements_dev.txt
+  script:
+    - /.pyenv/versions/3.6.0/bin/flake8 .
+
+tests:
+  stage: tests
+  script:
+  - tox
