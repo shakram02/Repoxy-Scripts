@@ -37,6 +37,9 @@ class PoxRunner:
         debug(colorize("Shut down controller done exit code"))
 
     def kill_controller(self):
+        if self._process is None:
+            return
+
         debug(colorize("Killing controller with [SIGINT]"))
         os.killpg(os.getpgid(self._process.pid), signal.SIGKILL)
         exit_code = self._process.wait()
