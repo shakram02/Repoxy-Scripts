@@ -72,21 +72,25 @@ def main(ip):
 
     while not terminated:
         # Convert data to string, we don't need binary tides
+        byte_count = client_sock.recv(64)
+
+        if byte_count == -1:
+            return
+
         data = str(client_sock.recv(64)).strip()
-
-        if len(data) == 0:
-            break
-
         data = data.split('\r\n')
 
+        if len(data) == 0:
+            print("Nothing received, Killing controller")
+            return
+
         for item in data:
+            debug(colorize("Command: {}".format(item)))
+            if item == PROTO_EXIT or len(item) == 0:
+                return
+
             item = item.strip().upper()
-
             proto_process(item, pox_runner)
-
-            if item is PROTO_EXIT:
-                terminated = True
-                break
 
 
 if __name__ == "__main__":
@@ -109,7 +113,7 @@ if __name__ == "__main__":
         main(controller_ip)
     except Exception as e:
         error(e)
-
+    finally:
         pox_runner.kill_controller()
         # Close all open sockets
         for s in OPEN_SOCKETS:
