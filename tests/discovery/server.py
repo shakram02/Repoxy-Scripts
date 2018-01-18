@@ -1,6 +1,7 @@
 from __future__ import print_function
 import socket
-from messages import DISCOVER_PREFIX
+import sys
+from constants import DISCOVERY_PREFIX, DISCOVERY_PORT
 
 
 class DiscoveryServer(object):
@@ -30,10 +31,10 @@ class DiscoveryServer(object):
             connected += 1
 
             if onreceive is not None:
-                onreceive(address, data.replace(DISCOVER_PREFIX, "", 1))
+                onreceive(address, data.replace(DISCOVERY_PREFIX, "", 1))
 
-            if data.startswith(DISCOVER_PREFIX):
-                sent = self._sock.sendto(DISCOVER_PREFIX.encode(), address)
+            if data.startswith(DISCOVERY_PREFIX):
+                sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), address)
                 if sent == -1:
                     self.stop()
                     return
@@ -42,16 +43,21 @@ class DiscoveryServer(object):
         self._sock.close()
 
 
+def try_get_arg(index, default):
+    try:
+        return sys.argv[index]
+    except IndexError:
+        return default
+
+
 def main():
     print("Running discovery server...")
-    server = DiscoveryServer('', 9434, 1)
+
+    expected_clients = try_get_arg(1, 1)
+
+    server = DiscoveryServer('', DISCOVERY_PORT, expected_clients)
     server.start(onreceive=lambda addr, data: print("Client:", addr, "Sent: [", data, "]"))
 
-
-if __package__ is None:
-    from os import sys, path
-
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 if __name__ == "__main__":
     try:

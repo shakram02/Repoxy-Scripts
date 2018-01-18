@@ -1,10 +1,13 @@
 from __future__ import print_function
-from socket import *
-from messages import DISCOVER_PREFIX
+from socket import socket, timeout, SO_BROADCAST, SOL_SOCKET, SO_REUSEADDR, SOCK_DGRAM, AF_INET
+
+import sys
+
+from constants import DISCOVERY_PREFIX, DISCOVERY_PORT
 
 
 class DisocveryClient(object):
-    def __init__(self, port, disc_timeout=5, address='255.255.255.255'):
+    def __init__(self, port, disc_timeout=1, address='255.255.255.255'):
         self._server_address = (address, port)
         self._sock = socket(AF_INET, SOCK_DGRAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -12,34 +15,35 @@ class DisocveryClient(object):
         self._sock.settimeout(disc_timeout)
 
     def find_server(self):
-        try:
-            while True:
+        while True:
+            try:
                 # Send data
-                sent = self._sock.sendto(DISCOVER_PREFIX.encode(), self._server_address)
-
+                sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), self._server_address)
                 if sent == -1:
-                    return
+                    raise ConnectionError("Socket crashed")
 
-                # Receive response
+                # Receive response, blocks
                 data, server = self._sock.recvfrom(4096)
+
+                # Received data
                 msg = data.decode('UTF-8')
-                if msg.startswith(DISCOVER_PREFIX):
-                    return server, msg.replace(DISCOVER_PREFIX, "", 1)
-        finally:
-            self._sock.close()
+                self._sock.close()
+                if msg.startswith(DISCOVERY_PREFIX):
+
+                    return server, msg.replace(DISCOVERY_PREFIX, "", 1)
+                else:
+                    raise ConnectionError("Invalid identification message {}".format(msg))
+            except timeout:
+                print("Retrying to connect...", file=sys.stderr)
+                continue
 
 
 def main():
-    client = DisocveryClient(9434)
+    client = DisocveryClient(DISCOVERY_PORT)
     addr = client.find_server()
     print("Found server with address:", addr)
     pass
 
-
-if __package__ is None:
-    from os import sys, path
-
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 if __name__ == "__main__":
     main()
