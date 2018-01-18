@@ -25,3 +25,11 @@ the controller VM
 ## Adding custom dissector
 I'm not using default wireshark ports, I edited the OF dissector for `Wireshark` a little bit
 to display correct results, use the edited dissector
+
+## No internet access on VMs
+Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
+
+```
+nameserver 8.8.8.8
+nameserver 8.8.8.4
+```
