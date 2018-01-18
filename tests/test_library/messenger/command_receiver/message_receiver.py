@@ -14,7 +14,7 @@ CONTROLLER_PORT_BASE = 6830
 def get_machine_number():
     try:
         # 4 or 5
-        return int(sys.argv[1])
+        return sys.argv[1]
     except IndexError:
         print("[Fallback to default machine number {4}]")
         return 4
@@ -48,12 +48,12 @@ def proto_process(item, controller_manager):
 
     elif item == PROTO_SHUT_DOWN:
         debug(colorize("Shutting down POX"))
-        # controller_manager.shutdown_controller()
+        controller_manager.shutdown_controller()
         debug(colorize("POX is now down"))
 
-    elif item == PROTO_KILL:
+    elif item == PROTO_KILL or len(item) == 0:
         debug(colorize("Killing POX"))
-        # controller_manager.kill_controller()
+        controller_manager.kill_controller()
         debug(colorize("Killed POX"))
 
 
