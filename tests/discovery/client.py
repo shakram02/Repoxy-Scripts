@@ -1,5 +1,6 @@
+from __future__ import print_function
 from socket import *
-from tests.networking.messages import DISCOVER_PREFIX
+from messages import DISCOVER_PREFIX
 
 
 class DisocveryClient(object):
@@ -34,6 +35,11 @@ def main():
     print("Found server with address:", addr)
     pass
 
+
+if __package__ is None:
+    from os import sys, path
+
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 if __name__ == "__main__":
     main()
