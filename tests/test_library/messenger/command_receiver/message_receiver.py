@@ -100,7 +100,8 @@ if __name__ == "__main__":
     machine_number = get_machine_number()
 
     controller_ip = '192.168.1.24{}'.format(machine_number)
-    messenger_bind_port = MESSENGER_PORT_BASE + int(machine_number)
+    messenger_bind_port = MESSENGER_PORT_BASE + machine_number
+
     controller_port = CONTROLLER_PORT_BASE + machine_number
     pox_runner = PoxRunner(controller_ip, controller_port)
 
