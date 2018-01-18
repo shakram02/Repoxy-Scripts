@@ -14,7 +14,7 @@ CONTROLLER_PORT_BASE = 6830
 def get_machine_number():
     try:
         # 4 or 5
-        return sys.argv[1]
+        return int(sys.argv[1])
     except IndexError:
         print("[Fallback to default machine number {4}]")
         return 4
@@ -57,7 +57,7 @@ def proto_process(item, controller_manager):
         debug(colorize("Killed POX"))
 
 
-def main():
+def main(ip):
     global OPEN_SOCKETS
 
     server = create_and_start_listener_socket(ip, messenger_bind_port)
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     pox_runner = PoxRunner(controller_ip, controller_port)
 
     try:
-        main()
+        main(controller_ip)
     except Exception as e:
         error(e)
 
