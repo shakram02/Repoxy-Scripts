@@ -1,5 +1,6 @@
+from __future__ import print_function
 import socket
-from tests.networking.messages import DISCOVER_PREFIX
+from messages import DISCOVER_PREFIX
 
 
 class DiscoveryServer(object):
@@ -46,6 +47,11 @@ def main():
     server = DiscoveryServer('', 9434, 1)
     server.start(onreceive=lambda addr, data: print("Client:", addr, "Sent: [", data, "]"))
 
+
+if __package__ is None:
+    from os import sys, path
+
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
 if __name__ == "__main__":
     try:
