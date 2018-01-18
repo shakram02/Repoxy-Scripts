@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import socket
 from pox_runner import PoxRunner
 from protocol_messages import *
@@ -14,7 +16,7 @@ def get_machine_number():
         # 4 or 5
         return int(sys.argv[1])
     except IndexError:
-        print "[Fallback to default machine number {4}]"
+        print("[Fallback to default machine number {4}]")
         return 4
 
 
@@ -38,7 +40,7 @@ def clean_up(pox_wrapper, server, client_sock):
 
 def proto_process(item, controller_manager):
     # Split by \r\n
-    print 'Received {}'.format(item)
+    print('Received {}'.format(item))
 
     if item == PROTO_LAUNCH:
         debug(colorize("Launching POX"))
@@ -97,10 +99,10 @@ if __name__ == "__main__":
     logger = getLogger(__name__)
     machine_number = get_machine_number()
 
-    ip = '192.168.1.24{}'.format(machine_number)
+    controller_ip = '192.168.1.24{}'.format(machine_number)
     messenger_bind_port = MESSENGER_PORT_BASE + int(machine_number)
     controller_port = CONTROLLER_PORT_BASE + machine_number
-    pox_runner = PoxRunner(ip, controller_port)
+    pox_runner = PoxRunner(controller_ip, controller_port)
 
     try:
         main()
