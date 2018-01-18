@@ -29,6 +29,19 @@ to display correct results, use the edited dissector
 ## No internet access on VMs
 Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
 
+```JSON
+{
+  "network_ip": "x.x.x.x",
+  "proxy_port": "x",
+  "cont_main_ip": "x.x.x.x",
+  "cont_repl_ip": "x.x.x.x",
+  "proxy_ip": "x.x.x.x"
+}
+```
+
+## No internet access on VMs
+Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
+
 ```
 nameserver 8.8.8.8
 nameserver 8.8.8.4
