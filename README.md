@@ -6,6 +6,7 @@ Scripts that make life easier in automation and benchmarking
 - Forwarding controller component
 - Shell scripts
     - Launch controller
+    - Update script of git branches
 
 ## Test automation
 A messenger sends commands from the mininet VM to the other VMs so that they
