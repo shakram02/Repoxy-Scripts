@@ -3,6 +3,9 @@
 
 pcapng_eng/
 
+# Mininet directory is added for definitions only
+mininet/
+
 # User-specific stuff:
 .idea/**/workspace.xml
 .idea/**/tasks.xml
