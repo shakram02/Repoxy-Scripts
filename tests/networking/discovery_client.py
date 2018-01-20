@@ -14,22 +14,22 @@ class DisocveryClient(object):
         self._sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self._sock.settimeout(disc_timeout)
 
-    def find_server(self):
+    def find_server(self, msg=""):
         while True:
             try:
                 # Send data
-                sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), self._server_address)
+                sent = self._sock.sendto((DISCOVERY_PREFIX + msg).encode(), self._server_address)
                 if sent == -1:
                     raise ConnectionError("Socket crashed")
 
                 # Receive response, blocks
-                data, server = self._sock.recvfrom(4096)
+                data, server = self._sock.recvfrom(256)
 
                 # Received data
                 msg = data.decode('UTF-8')
                 self._sock.close()
-                if msg.startswith(DISCOVERY_PREFIX):
 
+                if msg.startswith(DISCOVERY_PREFIX):
                     return server, msg.replace(DISCOVERY_PREFIX, "", 1)
                 else:
                     raise ConnectionError("Invalid identification message {}".format(msg))

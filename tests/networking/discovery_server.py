@@ -17,7 +17,7 @@ class DiscoveryServer(object):
         connected = 0
         while connected < self._expected_count:
             try:
-                data, address = self._sock.recvfrom(4096)
+                data, address = self._sock.recvfrom(256)
             except socket.timeout:
                 try_count += 1
 
