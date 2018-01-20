@@ -5,6 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/discovery" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/mininet" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mininet" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (of_DimensionalGate_Scripts)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
