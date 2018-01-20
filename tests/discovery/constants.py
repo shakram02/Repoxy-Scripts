@@ -1,2 +1,3 @@
 DISCOVERY_PREFIX = 'ofd_'
 DISCOVERY_PORT = 6829
+UDP_ACK = bytes([1])
