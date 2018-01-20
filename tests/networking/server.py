@@ -51,7 +51,7 @@ def try_get_arg(index, default):
 
 
 def main():
-    print("Running discovery server...")
+    print("Running networking server...")
 
     expected_clients = try_get_arg(1, 1)
 
