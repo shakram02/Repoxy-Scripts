@@ -20,7 +20,7 @@ class TcpClient(object):
         if isinstance(msg, (bytes, bytearray)):
             sent = self._sock.send(msg)
         else:
-            sent = self._sock.send(bytes(msg))
+            sent = self._sock.send(bytes(msg, "UTF-8"))
 
         if sent == -1:
             raise ConnectionError("Socket error")
@@ -53,13 +53,13 @@ class TcpServer(object):
         if isinstance(msg, (bytes, bytearray)):
             sent = self._client.send(msg)
         else:
-            sent = self._client.send(bytes(msg))
+            sent = self._client.send(bytes(msg, "UTF-8"))
 
         if sent == -1:
             raise ConnectionError("Socket error")
 
     def recv(self):
-        data, _ = self._client.recv(256)
+        data = self._client.recv(256)
         return data
 
     def close(self):
@@ -79,6 +79,7 @@ def recv_th(port):
         if val is None:
             continue
         else:
+            print("Recv (bytes/text):", val.decode("UTF-8"))
             break
 
     print("Done...")
@@ -94,8 +95,9 @@ def test(port):
     sender = TcpClient()
     sender.connect("localhost", port + 1)
     sender.send(bytes([123, 111]))
+    sender.send("asdas")
 
-    sleep(0.5)
+    sleep(1.5)
     th.join()
 
 
