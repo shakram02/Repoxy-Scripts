@@ -14,8 +14,14 @@ class DiscoveryClient(object):
         self._sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self._sock.settimeout(disc_timeout)
 
-    def find_server(self, msg=""):
-        while True:
+    def find_server(self, msg="", retry_count=-1):
+        if not isinstance(msg, str):
+            msg = str(msg)
+
+        count = 0
+        while count < retry_count or retry_count == -1:
+            count += 1
+
             try:
                 # Send data
                 sent = self._sock.sendto((DISCOVERY_PREFIX + msg).encode(), self._server_address)
