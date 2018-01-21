@@ -5,9 +5,10 @@ from constants import DISCOVERY_PREFIX, DISCOVERY_PORT, DISCOVERY_TIMEOUT
 
 
 class DiscoveryServer(object):
-    def __init__(self, server_ip, port, count, timeout=DISCOVERY_TIMEOUT):
+    def __init__(self, server_port, count, timeout=DISCOVERY_TIMEOUT):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.bind((server_ip, port))
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._sock.bind(('', server_port))
         self._sock.settimeout(timeout)
 
         self._expected_count = count
@@ -66,7 +67,7 @@ def main():
 
     expected_clients = try_get_arg(1, 1)
 
-    server = DiscoveryServer('', DISCOVERY_PORT, expected_clients)
+    server = DiscoveryServer(DISCOVERY_PORT, expected_clients)
     server.start(onreceive=lambda addr, data: print("Client:", addr, "Sent: [", data, "]"))
 
 
