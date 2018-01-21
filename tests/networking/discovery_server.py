@@ -1,11 +1,11 @@
 from __future__ import print_function
 import socket
 import sys
-from constants import DISCOVERY_PREFIX, DISCOVERY_PORT
+from constants import DISCOVERY_PREFIX, DISCOVERY_PORT, DISCOVERY_TIMEOUT
 
 
 class DiscoveryServer(object):
-    def __init__(self, server_ip, port, count, timeout=5):
+    def __init__(self, server_ip, port, count, timeout=DISCOVERY_TIMEOUT):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.bind((server_ip, port))
         self._sock.settimeout(timeout)

@@ -3,11 +3,11 @@ from socket import socket, timeout, SO_BROADCAST, SOL_SOCKET, SO_REUSEADDR, SOCK
 
 import sys
 
-from constants import DISCOVERY_PREFIX, DISCOVERY_PORT
+from constants import DISCOVERY_PREFIX, DISCOVERY_PORT, DISCOVERY_TIMEOUT
 
 
 class DiscoveryClient(object):
-    def __init__(self, port, disc_timeout=1, address='255.255.255.255'):
+    def __init__(self, port, disc_timeout=DISCOVERY_TIMEOUT, address='255.255.255.255'):
         self._server_address = (address, port)
         self._sock = socket(AF_INET, SOCK_DGRAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)

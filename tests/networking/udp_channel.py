@@ -1,4 +1,4 @@
-from constants import UDP_ACK
+from constants import UDP_ACK, DISCOVERY_TIMEOUT
 from socket import socket, timeout, SO_BROADCAST, SOL_SOCKET, SO_REUSEADDR, SOCK_DGRAM, AF_INET
 
 
@@ -7,7 +7,7 @@ class UdpChannel(object):
         self._sock = socket(AF_INET, SOCK_DGRAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self._sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        self._sock.settimeout(0.5)
+        self._sock.settimeout(DISCOVERY_TIMEOUT)
         self._sock.bind((ip, port))
 
     def send(self, msg, ip, port):
