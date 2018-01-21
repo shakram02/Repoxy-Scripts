@@ -1,9 +1,10 @@
-import subprocess
+from __future__ import print_function
 import os
+import shlex
 import signal
+import subprocess
 from logging import debug
 from threading import Thread
-import shlex
 
 _SHUTDOWN_TIMEOUT = 3
 
@@ -20,9 +21,9 @@ class PoxRunner:
 
     def launch_controller(self):
         debug(colorize("Starting controller"))
-        # self._process = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
-        self._process = subprocess.Popen(shlex.split(self.command), bufsize=0,
-                                         universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        # POX uses stderr for logging
+        self._process = subprocess.Popen(shlex.split(self.command), bufsize=0, stderr=subprocess.PIPE)
         debug(colorize("Controller started"))
 
     def shutdown_controller(self, timeout=_SHUTDOWN_TIMEOUT):
@@ -54,9 +55,20 @@ class PoxRunner:
     def is_alive(self):
         return self._process is None
 
-    def read_stdout(self):
-        for line in iter(self._process.stdout.readline, b''):
-            print('got line: {0}'.format(line.decode('utf-8')))
+    def wait_till_ready(self, on_ready_callback):
+        """
+        Waits until POX has finished starting up
+        :param on_ready_callback: function to be called when the controller is ready
+        """
+
+        for line in iter(self._process.stderr.readline, b''):
+            out_line = line.decode('utf-8')
+            print('{0}'.format(out_line))
+
+            # TODO: this is a hack, yes I know. Please tell me if you find a better solution
+            if "Listening" in out_line:
+                on_ready_callback(out_line)
+                return
 
 
 BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
@@ -68,17 +80,20 @@ def colorize(string):
     return "{}{}[{}]{}".format(BLUE_BACKGROUND_BRIGHT, WHITE_BOLD, string, RESET)
 
 
+def on_ready(x):
+    print("READY:", x)
+
+
 def test():
+    # Start POX then tear it down
     runner = PoxRunner("localhost", 6833)
     runner.launch_controller()
 
-    th = Thread(target=runner.read_stdout)
+    th = Thread(target=runner.wait_till_ready, args=(on_ready,))
     th.start()
 
     th.join()
-    from time import sleep
     print("Waiting till shutdown...")
-    sleep(7)
     runner.shutdown_controller()
 
 
