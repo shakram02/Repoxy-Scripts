@@ -37,7 +37,8 @@ class DiscoveryServer(object):
 
             # Update state
             connected += 1
-            self._clients.append([address, data])
+            client_ip = address[0]  # Ignore client port, it's meaningless
+            self._clients.append([client_ip, data])
 
             if onreceive is not None:
                 onreceive(address, data)
