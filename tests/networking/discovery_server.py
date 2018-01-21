@@ -5,6 +5,11 @@ from constants import DISCOVERY_PREFIX, DISCOVERY_PORT, DISCOVERY_TIMEOUT
 
 
 class DiscoveryServer(object):
+    """
+    Receives UDP broadcasts to figure out client IPs, each caught client will be
+    sent a TCP port to open a connection with and then exchange data reliably through
+    """
+
     def __init__(self, server_port, count, timeout=DISCOVERY_TIMEOUT):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -14,7 +19,7 @@ class DiscoveryServer(object):
         self._expected_count = count
         self._clients = []
 
-    def start(self, max_try_count=-1, onreceive=None):
+    def start(self, tcp_port=0, max_try_count=-1, onreceive=None):
         try_count = 0
         connected = 0
         while connected < self._expected_count:
@@ -22,10 +27,8 @@ class DiscoveryServer(object):
                 data, address = self._sock.recvfrom(256)
                 data = str(data.decode('UTF-8'))
 
-                if not data.startswith(DISCOVERY_PREFIX):
+                if not data == DISCOVERY_PREFIX:
                     raise AssertionError("Invalid Identification message {}".format(data))
-                else:
-                    data = data.replace(DISCOVERY_PREFIX, "", 1)
 
             except socket.timeout:
                 try_count += 1
@@ -38,13 +41,13 @@ class DiscoveryServer(object):
             # Update state
             connected += 1
             client_ip = address[0]  # Ignore client port, it's meaningless
-            self._clients.append([client_ip, data])
+            self._clients.append(client_ip)
 
             if onreceive is not None:
-                onreceive(address, data)
+                onreceive(address)
 
-            # Reply with ACK
-            sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), address)
+            # Reply with TCP port
+            sent = self._sock.sendto((DISCOVERY_PREFIX + str(tcp_port)).encode(), address)
             if sent == -1:
                 self.stop()
                 raise ConnectionError("Socket crashed")
@@ -65,11 +68,11 @@ def try_get_arg(index, default):
 
 def main():
     print("Running networking server...")
-
+    tcp_port = 6011  # Port to open TCP connection with
     expected_clients = try_get_arg(1, 1)
 
     server = DiscoveryServer(DISCOVERY_PORT, expected_clients)
-    server.start(onreceive=lambda addr, data: print("Client:", addr, "Sent: [", data, "]"))
+    server.start(tcp_port, onreceive=lambda addr: print("Client:", addr))
 
 
 if __name__ == "__main__":

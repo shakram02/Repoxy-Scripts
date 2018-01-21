@@ -7,6 +7,10 @@ from constants import DISCOVERY_PREFIX, DISCOVERY_PORT, DISCOVERY_TIMEOUT
 
 
 class DiscoveryClient(object):
+    """
+    Tries to reach a DiscoveryServer to get the TCP port to open connection to
+    """
+
     def __init__(self, port, disc_timeout=DISCOVERY_TIMEOUT, address='255.255.255.255'):
         self._server_address = (address, port)
         self._sock = socket(AF_INET, SOCK_DGRAM)
@@ -14,17 +18,14 @@ class DiscoveryClient(object):
         self._sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self._sock.settimeout(disc_timeout)
 
-    def find_server(self, msg="", retry_count=-1):
-        if not isinstance(msg, str):
-            msg = str(msg)
-
+    def find_server(self, retry_count=-1):
         count = 0
         while count < retry_count or retry_count == -1:
             count += 1
 
             try:
                 # Send data
-                sent = self._sock.sendto((DISCOVERY_PREFIX + msg).encode(), self._server_address)
+                sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), self._server_address)
                 if sent == -1:
                     raise ConnectionError("Socket crashed")
 
@@ -36,7 +37,8 @@ class DiscoveryClient(object):
                 self._sock.close()
 
                 if msg.startswith(DISCOVERY_PREFIX):
-                    server_ip, _ = server  # Drop port
+                    server_ip, _ = server  # Drop sender port
+                    # The server reply must contain tcp port
                     return server_ip, msg.replace(DISCOVERY_PREFIX, "", 1)
                 else:
                     raise ConnectionError("Invalid identification message {}".format(msg))
