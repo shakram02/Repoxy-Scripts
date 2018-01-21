@@ -2,7 +2,6 @@ import subprocess
 import os
 import signal
 from logging import debug
-from misc import colorize
 
 _SHUTDOWN_TIMEOUT = 3
 
@@ -25,12 +24,14 @@ class PoxRunner:
     def shutdown_controller(self, timeout=_SHUTDOWN_TIMEOUT):
         if self._process is None:
             return
-        os.killpg(os.getpgid(self._process.pid), signal.SIGINT)
+        debug(colorize("Shutting down controller with [SIGINT],  waiting for termination..."))
 
-        debug(colorize("Shutting down controller with [SIGINT]"))
+        os.killpg(os.getpgid(self._process.pid), signal.SIGINT)
         try:
             self._process.wait()
             self._process = None
+
+            debug(colorize("Terminated"))
         except Exception as e:
             debug(colorize("An error occured while waiting the process to terminate:{}".format(e)))
 
@@ -40,7 +41,19 @@ class PoxRunner:
         if self._process is None:
             return
 
-        debug(colorize("Killing controller with [SIGINT]"))
+        debug(colorize("Killing controller with [SIGKILL]"))
         os.killpg(os.getpgid(self._process.pid), signal.SIGKILL)
         exit_code = self._process.wait()
         debug(colorize("Shutting down controller done exit code: {}".format(exit_code)))
+
+    def is_alive(self):
+        return self._process is None
+
+
+BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
+WHITE_BOLD = "\033[1;37m"
+RESET = "\033[0m"
+
+
+def colorize(string):
+    return "{}{}[{}]{}".format(BLUE_BACKGROUND_BRIGHT, WHITE_BOLD, string, RESET)
