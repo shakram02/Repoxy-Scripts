@@ -59,7 +59,10 @@ class TcpServer(object):
             raise ConnectionError("Socket error")
 
     def recv(self):
-        data = self._client.recv(256)
+        try:
+            data = self._client.recv(256)
+        except timeout:
+            return None
         return data
 
     def close(self):
@@ -94,7 +97,6 @@ def test(port):
 
     sender = TcpClient()
     sender.connect("localhost", port + 1)
-    sender.send(bytes([123, 111]))
     sender.send("asdas")
 
     sleep(1.5)
