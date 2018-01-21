@@ -11,6 +11,7 @@ class DiscoveryServer(object):
         self._sock.settimeout(timeout)
 
         self._expected_count = count
+        self._clients = []
 
     def start(self, max_try_count=-1, onreceive=None):
         try_count = 0
@@ -18,26 +19,36 @@ class DiscoveryServer(object):
         while connected < self._expected_count:
             try:
                 data, address = self._sock.recvfrom(256)
+                data = str(data.decode('UTF-8'))
+
+                if not data.startswith(DISCOVERY_PREFIX):
+                    raise AssertionError("Invalid Identification message {}".format(data))
+                else:
+                    data = data.replace(DISCOVERY_PREFIX, "", 1)
+
             except socket.timeout:
                 try_count += 1
 
                 if try_count == max_try_count:
                     self.stop()
                     return
-
                 continue
 
-            data = str(data.decode('UTF-8'))
+            # Update state
             connected += 1
+            self._clients.append([address, data])
 
             if onreceive is not None:
-                onreceive(address, data.replace(DISCOVERY_PREFIX, "", 1))
+                onreceive(address, data)
 
-            if data.startswith(DISCOVERY_PREFIX):
-                sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), address)
-                if sent == -1:
-                    self.stop()
-                    return
+            # Reply with ACK
+            sent = self._sock.sendto(DISCOVERY_PREFIX.encode(), address)
+            if sent == -1:
+                self.stop()
+                raise ConnectionError("Socket crashed")
+
+    def get_clients(self):
+        return self._clients
 
     def stop(self):
         self._sock.close()
