@@ -1,11 +1,13 @@
 from socket import socket, timeout, SOL_SOCKET, SO_REUSEADDR, SOCK_STREAM, AF_INET
 
+from constants import DISCOVERY_TIMEOUT
+
 
 class TcpClient(object):
     def __init__(self):
         self._sock = socket(AF_INET, SOCK_STREAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self._sock.settimeout(0.5)
+        self._sock.settimeout(DISCOVERY_TIMEOUT)
 
     def connect(self, ip, port):
         """

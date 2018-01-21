@@ -3,22 +3,24 @@ from tcp_channel import TcpClient, TcpServer
 from threading import Thread
 from time import sleep
 
-KILL_TIMEOUT = 5
+_KILL_TIMEOUT = 5
+_KILL_MSG = "EXIT"
 
 
 class ControllerTx(object):
     """
-    Represents an open channel to controller machine
+    Represents an open channel to controller machine. That's a weak abstraction,
+    TODO might be disposed later
     """
 
     def __init__(self):
         self._channel = TcpClient()
 
-    def open_connection(self, ip, port):
-        self._channel.connect(ip, port)
+    def open_connection(self, msgr_ip, port):
+        self._channel.connect(msgr_ip, port)
 
     def kill_controller(self):
-        self._channel.send()
+        self._channel.send(_KILL_MSG)
 
 
 class ControllerMachineRx(object):
@@ -28,11 +30,11 @@ class ControllerMachineRx(object):
     send any packets. So, automatically starting it up just saves effort
     """
 
-    def __init__(self, ip, port):
-        self._channel = TcpServer(ip, port)
-        self._th = Thread(target=self._recv_thread)
-        self._th.start()
-        self._pox_runner = PoxRunner(ip, port)
+    def __init__(self, msgr_ip, msgr_port):
+        self._channel = TcpServer(msgr_ip, msgr_port)
+        self._tcp_receiver = Thread(target=self._recv_thread)
+        self._tcp_receiver.start()
+        self._pox_runner = None
 
     def _recv_thread(self):
         while True:
@@ -40,22 +42,23 @@ class ControllerMachineRx(object):
             if command is None:
                 continue
 
-            if command == "EXIT":
+            if command == _KILL_MSG:
                 self.kill_controller()
-                self._th.join(5)
+                self._tcp_receiver.join(5)
                 return
 
     def kill_controller(self):
         self._pox_runner.shutdown_controller()
 
         if self._pox_runner.is_alive():
-            self._force_kill(KILL_TIMEOUT)
+            self._force_kill(_KILL_TIMEOUT)
 
-    def start_controller(self):
+    def start_controller(self, ip, port):
         """
         Called by test maker, not remotely
         :return:
         """
+        self._pox_runner = PoxRunner(ip, port)
         self._pox_runner.launch_controller()
 
     def _force_kill(self, timeout=0):
