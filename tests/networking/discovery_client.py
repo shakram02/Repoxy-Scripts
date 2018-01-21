@@ -36,7 +36,8 @@ class DiscoveryClient(object):
                 self._sock.close()
 
                 if msg.startswith(DISCOVERY_PREFIX):
-                    return server, msg.replace(DISCOVERY_PREFIX, "", 1)
+                    server_ip, _ = server  # Drop port
+                    return server_ip, msg.replace(DISCOVERY_PREFIX, "", 1)
                 else:
                     raise ConnectionError("Invalid identification message {}".format(msg))
             except timeout:
