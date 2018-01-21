@@ -5,7 +5,7 @@ from constants import DISCOVERY_PREFIX, DISCOVERY_PORT
 
 
 class DiscoveryServer(object):
-    def __init__(self, server_ip, port, count, timeout=1):
+    def __init__(self, server_ip, port, count, timeout=5):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.bind((server_ip, port))
         self._sock.settimeout(timeout)

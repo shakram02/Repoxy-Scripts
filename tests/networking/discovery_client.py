@@ -6,7 +6,7 @@ import sys
 from constants import DISCOVERY_PREFIX, DISCOVERY_PORT
 
 
-class DisocveryClient(object):
+class DiscoveryClient(object):
     def __init__(self, port, disc_timeout=1, address='255.255.255.255'):
         self._server_address = (address, port)
         self._sock = socket(AF_INET, SOCK_DGRAM)
@@ -39,7 +39,7 @@ class DisocveryClient(object):
 
 
 def main():
-    client = DisocveryClient(DISCOVERY_PORT)
+    client = DiscoveryClient(DISCOVERY_PORT)
     addr = client.find_server()
     print("Found server with address:", addr)
     pass
