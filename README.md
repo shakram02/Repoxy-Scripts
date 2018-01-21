@@ -25,3 +25,16 @@ the controller VM
 ## Adding custom dissector
 I'm not using default wireshark ports, I edited the OF dissector for `Wireshark` a little bit
 to display correct results, use the edited dissector
+
+## Config File sample
+The `config.json` file placed in the `tests` directory must have the following format (replaces all `x`s with your values)
+
+```JSON
+{
+  "network_ip": "x.x.x.x",
+  "proxy_port": "x",
+  "cont_main_ip": "x.x.x.x",
+  "cont_repl_ip": "x.x.x.x",
+  "proxy_ip": "x.x.x.x"
+}
+```
