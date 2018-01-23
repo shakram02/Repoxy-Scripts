@@ -1,13 +1,12 @@
 from socket import socket, timeout, SOL_SOCKET, SO_REUSEADDR, SOCK_STREAM, AF_INET
 
-from constants import DISCOVERY_TIMEOUT
-
 
 class TcpClient(object):
-    def __init__(self):
+    def __init__(self, socket_timeout=5):
         self._sock = socket(AF_INET, SOCK_STREAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self._sock.settimeout(DISCOVERY_TIMEOUT)
+        self._sock.settimeout(socket_timeout)
+        self._default_timeout = socket_timeout
 
     def connect(self, ip, port):
         """
@@ -34,17 +33,22 @@ class TcpClient(object):
         except timeout:
             return None
 
+    def recv_blocking(self):
+        self._sock.settimeout(0)
+        val = self.recv()
+        self._sock.settimeout(self._default_timeout)
+        return val
+
     def close(self):
         self._sock.close()
 
 
 class TcpServer(object):
-    def __init__(self, ip, port, socket_timeout=5):
+    def __init__(self, ip, port):
         self._sock = socket(AF_INET, SOCK_STREAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self._sock.settimeout(socket_timeout)
         self._sock.bind((ip, port))
-        self._sock.listen()
+        self._sock.listen(3)
         self._client = None
         self.client_addr = None
 
