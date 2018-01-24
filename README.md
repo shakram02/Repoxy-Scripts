@@ -26,24 +26,6 @@ the controller VM
 I'm not using default wireshark ports, I edited the OF dissector for `Wireshark` a little bit
 to display correct results, use the edited dissector
 
-<<<<<<< HEAD
-## No internet access on VMs
-Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
-=======
-## Config File sample
-The `config.json` file placed in the `tests` directory must have the following format (replaces all `x`s with your values)
->>>>>>> boilerplate
-
-```JSON
-{
-  "network_ip": "x.x.x.x",
-  "proxy_port": "x",
-  "cont_main_ip": "x.x.x.x",
-  "cont_repl_ip": "x.x.x.x",
-  "proxy_ip": "x.x.x.x"
-}
-```
-
 ## No internet access on VMs
 Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
 
@@ -51,8 +33,6 @@ Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
 nameserver 8.8.8.8
 nameserver 8.8.8.4
 ```
-<<<<<<< HEAD
-=======
 
 ## Config File sample
 The `config.json` file placed in the `tests` directory must have the following format (replaces all `x`s with your values)
@@ -63,4 +43,3 @@ The `config.json` file placed in the `tests` directory must have the following f
   "proxy_ip": "x.x.x.x"
 }
 ```
->>>>>>> boilerplate
