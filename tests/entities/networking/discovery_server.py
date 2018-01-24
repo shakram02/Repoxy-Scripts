@@ -23,8 +23,8 @@ class DiscoveryServer(object):
 
     def start(self, tcp_port=0, max_try_count=-1, onreceive=None):
         try_count = 0
-        connected = 0
-        while connected < self._expected_count:
+
+        while len(self._clients) < self._expected_count:
             try:
                 data, address = self._sock.recvfrom(256)
                 data = str(data.decode('UTF-8'))
@@ -41,11 +41,9 @@ class DiscoveryServer(object):
                 continue
 
             # Update state
-            connected += 1
-            print(colorize("{}/{} connected".format(connected, self._expected_count)))
-
             client_ip = address[0]  # Ignore client port, it's meaningless
             self._clients.append(client_ip)
+            print(colorize("{}/{} connected".format(len(self._clients), self._expected_count)))
 
             if onreceive is not None:
                 onreceive(address)
@@ -55,6 +53,8 @@ class DiscoveryServer(object):
             if sent == -1:
                 self.stop()
                 raise ConnectionError("Socket crashed")
+
+        print(colorize("All clients are now connected..."))
 
     def get_clients(self):
         return self._clients
