@@ -10,13 +10,8 @@ def get_entry(entry_key):
 
 
 class ConfigEntry(Enum):
-    NetworkIp = 'network_ip'
-
     ProxyIp = 'proxy_ip'
     ProxyPort = 'proxy_port'
-
-    MainControllerIp = 'cont_main_ip'
-    ReplicatedControllerIp = 'cont_repl_ip'
 
 
 def test():
