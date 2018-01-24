@@ -1,10 +1,9 @@
 from __future__ import print_function
+
 import os
 import shlex
 import signal
 import subprocess
-from logging import debug
-from threading import Thread
 
 _SHUTDOWN_TIMEOUT = 3
 
@@ -20,44 +19,46 @@ class PoxRunner:
         self._process = None
 
     def launch_controller(self):
-        debug(colorize("Starting controller"))
+        print(colorize("Starting controller"))
 
         # POX uses stderr for logging
         self._process = subprocess.Popen(shlex.split(self.command), bufsize=0, stderr=subprocess.PIPE)
-        debug(colorize("Controller started"))
+        print(colorize("Controller started"))
 
-    def shutdown_controller(self, timeout=_SHUTDOWN_TIMEOUT):
+    def shutdown_controller(self):
         if self._process is None:
             return
-        debug(colorize("Shutting down controller with [SIGINT],  waiting for termination..."))
 
-        os.killpg(os.getpgid(self._process.pid), signal.SIGINT)
         try:
-            self._process.wait(timeout)
-            self._process = None
+            print(colorize("Shutting down controller with [SIGINT],  waiting for termination..."))
+            os.kill(self._process.pid, signal.SIGINT)
+            self._process.wait()
+            print(colorize("Shut down controller done exit code {}".format(self._process.returncode)))
 
-            debug(colorize("Terminated"))
+            self._process = None
         except Exception as e:
-            debug(colorize("An error occured while waiting the process to terminate:{}".format(e)))
+            print(colorize("An error occured while waiting the process to terminate:{}".format(e)))
             self.kill_controller()
 
-        debug(colorize("Shut down controller done exit code"))
+        print(colorize("Terminated"))
+        # TODO confirm controller killed
 
     def kill_controller(self):
         if self._process is None:
             return
 
-        debug(colorize("Killing controller with [SIGKILL]"))
+        print(colorize("Killing controller with [SIGKILL]"))
         os.killpg(os.getpgid(self._process.pid), signal.SIGKILL)
         exit_code = self._process.wait()
-        debug(colorize("Shutting down controller done exit code: {}".format(exit_code)))
+        print(colorize("Shutting down controller done exit code: {}".format(exit_code)))
 
     def is_alive(self):
         return self._process is None
 
-    def wait_till_ready(self, on_ready_callback):
+    def wait_till_ready(self, on_ready_callback=None):
         """
         Waits until POX has finished starting up
+        If you don't want this function to block, pass a callback and run this function in a separate thread
         :param on_ready_callback: function to be called when the controller is ready
         """
 
@@ -67,8 +68,15 @@ class PoxRunner:
 
             # TODO: this is a hack, yes I know. Please tell me if you find a better solution
             if "Listening" in out_line:
-                on_ready_callback(out_line)
-                return
+                if on_ready_callback is not None:
+                    # Callback mode
+                    on_ready_callback(out_line)
+                else:
+                    # Blocking mode
+                    return
+
+            if "Error" in out_line:
+                return  # TODO report error or recover
 
 
 BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
@@ -89,10 +97,7 @@ def test():
     runner = PoxRunner("localhost", 6833)
     runner.launch_controller()
 
-    th = Thread(target=runner.wait_till_ready, args=(on_ready,))
-    th.start()
-
-    th.join()
+    runner.wait_till_ready()
     print("Waiting till shutdown...")
     runner.shutdown_controller()
 
