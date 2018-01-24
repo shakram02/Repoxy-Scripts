@@ -52,10 +52,7 @@ The `config.json` file placed in the `tests` directory must have the following f
 
 ```JSON
 {
-  "network_ip": "x.x.x.x",
   "proxy_port": "x",
-  "cont_main_ip": "x.x.x.x",
-  "cont_repl_ip": "x.x.x.x",
   "proxy_ip": "x.x.x.x"
 }
 ```
