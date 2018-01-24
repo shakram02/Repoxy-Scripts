@@ -16,7 +16,6 @@ class TcpClient(object):
         address = (ip, port)
         self._sock.settimeout(self._default_timeout)
         self._sock.connect(address)
-        self._sock.settimeout(None)
 
     def send(self, msg):
         if isinstance(msg, (bytes, bytearray)):
