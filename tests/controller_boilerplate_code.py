@@ -1,7 +1,9 @@
+from threading import Thread
+
 from entities.config_maker import ConfigMaker
 from entities.controller_machine import ControllerMachineRx
-from networking.constants import DISCOVERY_PORT
-from discovery_client import DiscoveryClient
+from entities.networking.constants import DISCOVERY_PORT
+from entities.networking.discovery_client import DiscoveryClient
 
 
 def test():
@@ -33,7 +35,9 @@ def test():
 
     controller.connect_to_command_server()
     print("Controller will be ready, and will be killed when remote end requests")
+    # Wait the thread until it terminates
     controller.start_controller(config_maker.get_ip(), config_maker.get_controller_port())
+    controller.wait_till_terminate_requested()
 
 
 if __name__ == "__main__":
