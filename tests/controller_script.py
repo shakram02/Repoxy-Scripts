@@ -1,7 +1,9 @@
+from __future__ import print_function
 from entities.config_maker import ConfigMaker
 from entities.controller_machine import ControllerMachineRx
 from entities.networking.constants import DISCOVERY_PORT
 from entities.networking.discovery_client import DiscoveryClient
+from entities.networking.utils import get_ip
 
 
 def test():
@@ -16,7 +18,8 @@ def test():
     as ready
     """
     discovery_client = DiscoveryClient(DISCOVERY_PORT)
-    config_maker = ConfigMaker(6834)
+    machine_number = int(get_ip()[-1])
+    config_maker = ConfigMaker(6830 + machine_number)
 
     # The result is on the following format
     # [server_ip]_[server_msgr_tcp_port]
