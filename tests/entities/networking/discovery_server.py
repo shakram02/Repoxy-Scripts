@@ -1,7 +1,9 @@
 from __future__ import print_function
 import socket
 import sys
-from constants import DISCOVERY_PREFIX, DISCOVERY_PORT, DISCOVERY_TIMEOUT
+
+from entities.networking.constants import DISCOVERY_PORT, DISCOVERY_PREFIX, DISCOVERY_TIMEOUT
+from entities.networking.utils import colorize
 
 
 class DiscoveryServer(object):
@@ -40,6 +42,8 @@ class DiscoveryServer(object):
 
             # Update state
             connected += 1
+            print(colorize("{}/{} connected".format(connected, self._expected_count)))
+
             client_ip = address[0]  # Ignore client port, it's meaningless
             self._clients.append(client_ip)
 
