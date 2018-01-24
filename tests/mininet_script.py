@@ -11,8 +11,13 @@ from settings import ConfigEntry, get_entry
 
 
 def test():
-    client_count = 1
-    print(colorize("Server started"))
+    try:
+        import sys
+        client_count = int(sys.argv[1])
+    except IndexError:
+        client_count = 1
+
+    print(colorize("Server started, waiting {} clients...".format(client_count)))
     server = DiscoveryServer(DISCOVERY_PORT, client_count)
     tcp_server = TcpServer(get_ip(), SERVER_PORT)
 
