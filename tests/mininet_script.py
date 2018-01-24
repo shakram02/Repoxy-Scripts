@@ -1,9 +1,11 @@
 from entities.controller_machine import ControllerTx
+from entities.mininet_machine import MininetMachine
 from entities.networking.constants import DISCOVERY_PORT
 from entities.networking.discovery_server import DiscoveryServer
 from entities.networking.tcp_channel import TcpServer
 from entities.networking.utils import get_ip
 from entities.protocol import SERVER_PORT
+from settings import ConfigEntry, get_entry
 
 
 def test():
@@ -27,17 +29,20 @@ def test():
         print("Waiting controller to be ready...")
         tx.wait_ready()
 
-    print("Controllers ready...")
-
     # TODO run mininet here
-    print("Run mininet...")
+    print("Controllers ready, Run mininet...")
+
+    proxy_ip = "192.168.1.248"
+    proxy_port = 6833
+    machine = MininetMachine()
+    machine.start(2, 2, proxy_ip, proxy_port)
+    machine.ping()
+    machine.terminate()
+    print("Mininet Done...")
 
     for tx in txs:
         tx.kill_controller()
 
-    from time import sleep
-    print("Waiting a little bit")
-    sleep(4)
     tcp_server.close()
     print("Done...")
 
