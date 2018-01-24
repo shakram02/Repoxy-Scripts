@@ -4,7 +4,7 @@ from time import sleep
 from entities.networking.tcp_channel import TcpServer, TcpClient
 from entities.networking.utils import get_ip
 from entities.pox_runner import PoxRunner
-from entities.protocol import SERVER_PORT, CONTROLLER_READY, KILL_TIMEOUT, KILL_MSG
+from entities.protocol import SERVER_PORT, CONTROLLER_READY, KILL_MSG
 
 
 class ControllerTx(object):
@@ -51,7 +51,11 @@ class ControllerMachineRx(object):
         try:
             while True:
                 command = self._channel.recv()  # Returns None for some reason
-                print("Rx...")
+                if command is not None:
+                    print("Rx... {}".format(command))
+                else:
+                    print("Rx...")
+
                 if command == KILL_MSG:
                     print("Killing controller")
                     self._kill_controller()
@@ -65,7 +69,7 @@ class ControllerMachineRx(object):
         self._channel.close()
 
         if self._pox_runner.is_alive():
-            self._force_kill(KILL_TIMEOUT)
+            self._force_kill()
 
     def start_controller(self, ip, port):
         """
@@ -103,8 +107,7 @@ class ControllerMachineRx(object):
         # Initialize conenction with the other end point
         self._channel.connect(self._server_ip, self._server_port)
 
-    def _force_kill(self, timeout=0):
-        sleep(timeout)
+    def _force_kill(self):
         if self._pox_runner.is_alive():
             self._pox_runner.kill_controller()
 
