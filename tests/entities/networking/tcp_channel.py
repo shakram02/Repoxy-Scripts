@@ -27,11 +27,8 @@ class TcpClient(object):
             raise ConnectionError("Socket error")
 
     def recv(self):
-        try:
-            data = self._sock.recv(256)
-            return data
-        except timeout:
-            return None
+        data = self._sock.recv(256)
+        return data
 
     def close(self):
         self._sock.close()
