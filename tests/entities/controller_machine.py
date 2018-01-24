@@ -2,7 +2,7 @@ from threading import Thread
 from time import sleep
 
 from entities.networking.tcp_channel import TcpServer, TcpClient
-from entities.networking.utils import get_ip
+from entities.networking.utils import get_ip, colorize
 from entities.pox_runner import PoxRunner
 from entities.protocol import SERVER_PORT, CONTROLLER_READY, KILL_MSG
 
@@ -47,22 +47,16 @@ class ControllerMachineRx(object):
         self._temp_th_wait_ready = None
 
     def wait_till_terminate_requested(self):
-        import socket
-        try:
-            while True:
-                command = self._channel.recv()  # Returns None for some reason
-                if command is not None:
-                    print("Rx... {}".format(command))
-                else:
-                    print("Rx...")
+        command = self._channel.recv()  # Returns None for some reason
+        if command is not None:
+            print(colorize("Rx... {}".format(command)))
+        else:
+            print(colorize("Rx..."))
 
-                if command == KILL_MSG:
-                    print("Killing controller")
-                    self._kill_controller()
-                    return
-        except socket.error as e:
-            if e.errno != socket.errno.EBADF:
-                raise e
+        if command == KILL_MSG:
+            print(colorize("Killing controller"))
+            self._kill_controller()
+            return
 
     def _kill_controller(self):
         self._pox_runner.shutdown_controller()
