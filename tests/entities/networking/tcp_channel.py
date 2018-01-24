@@ -5,7 +5,6 @@ class TcpClient(object):
     def __init__(self, socket_timeout=5):
         self._sock = socket(AF_INET, SOCK_STREAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self._sock.settimeout(socket_timeout)
         self._default_timeout = socket_timeout
 
     def connect(self, ip, port):
@@ -15,7 +14,9 @@ class TcpClient(object):
         :param port: Port
         """
         address = (ip, port)
+        self._sock.settimeout(self._default_timeout)
         self._sock.connect(address)
+        self._sock.settimeout(None)
 
     def send(self, msg):
         if isinstance(msg, (bytes, bytearray)):
@@ -28,16 +29,10 @@ class TcpClient(object):
 
     def recv(self):
         try:
-            data, _ = self._sock.recv(256)
+            data = self._sock.recv(256)
             return data
         except timeout:
             return None
-
-    def recv_blocking(self):
-        self._sock.settimeout(0)
-        val = self.recv()
-        self._sock.settimeout(self._default_timeout)
-        return val
 
     def close(self):
         self._sock.close()
@@ -54,6 +49,7 @@ class TcpServer(object):
 
     def accept(self):
         self._client, self.client_addr = self._sock.accept()
+        return self._client
 
     def send(self, msg):
         if isinstance(msg, (bytes, bytearray)):
