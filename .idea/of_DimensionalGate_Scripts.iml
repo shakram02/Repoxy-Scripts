@@ -6,10 +6,6 @@
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/mininet" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/mininet" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/networking" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/mininet_topo" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/entities" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/test_library" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/plotter" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (of_DimensionalGate_Scripts)" jdkType="Python SDK" />

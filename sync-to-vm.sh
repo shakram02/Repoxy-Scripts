@@ -12,4 +12,4 @@ ip="192.168.1.24$1"
 # Sync controller component
 #rsync -ravI ssh ./controller-component/*.py "mn0@$ip:/home/mn0/pox/ext/"
 
-rsync -ravI ssh --exclude=".*" . "mn0@$ip:/home/mn0/px/$(basename "$PWD")/"
+rsync -ravI ssh --exclude=".*" --exclude="pcapng_env" . "mn0@$ip:/home/mn0/px/$(basename "$PWD")/"
