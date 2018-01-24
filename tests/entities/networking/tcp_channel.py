@@ -1,13 +1,11 @@
 from socket import socket, timeout, SOL_SOCKET, SO_REUSEADDR, SOCK_STREAM, AF_INET
 
-from constants import DISCOVERY_TIMEOUT
-
 
 class TcpClient(object):
-    def __init__(self):
+    def __init__(self, socket_timeout=5):
         self._sock = socket(AF_INET, SOCK_STREAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self._sock.settimeout(DISCOVERY_TIMEOUT)
+        self._default_timeout = socket_timeout
 
     def connect(self, ip, port):
         """
@@ -16,6 +14,7 @@ class TcpClient(object):
         :param port: Port
         """
         address = (ip, port)
+        self._sock.settimeout(self._default_timeout)
         self._sock.connect(address)
 
     def send(self, msg):
@@ -29,7 +28,7 @@ class TcpClient(object):
 
     def recv(self):
         try:
-            data, _ = self._sock.recv(256)
+            data = self._sock.recv(256)
             return data
         except timeout:
             return None
@@ -39,17 +38,17 @@ class TcpClient(object):
 
 
 class TcpServer(object):
-    def __init__(self, ip, port, socket_timeout=5):
+    def __init__(self, ip, port):
         self._sock = socket(AF_INET, SOCK_STREAM)
         self._sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        self._sock.settimeout(socket_timeout)
         self._sock.bind((ip, port))
-        self._sock.listen()
+        self._sock.listen(3)
         self._client = None
         self.client_addr = None
 
     def accept(self):
         self._client, self.client_addr = self._sock.accept()
+        return self._client
 
     def send(self, msg):
         if isinstance(msg, (bytes, bytearray)):

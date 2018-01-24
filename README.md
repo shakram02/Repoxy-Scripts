@@ -38,3 +38,11 @@ The `config.json` file placed in the `tests` directory must have the following f
   "proxy_ip": "x.x.x.x"
 }
 ```
+
+## No internet access on VMs
+Edit `/etc/resolvconf/resolv.conf.d/base` to contain:
+
+```
+nameserver 8.8.8.8
+nameserver 8.8.8.4
+```
