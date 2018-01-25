@@ -1,6 +1,8 @@
 from mininet import clean
+from mininet.log import setLogLevel
 from mininet.net import Mininet
 from mininet.topolib import TreeTopo
+from mininet.util import dumpNodeConnections
 from mininet_topo.complex_topology import ComplexTopo
 
 
@@ -20,14 +22,17 @@ class MininetMachine(object):
         :return Created network object
         """
         self._clean()
+        setLogLevel('info')
 
         if topo is None:
             self._net = Mininet()
             topo = ComplexTopo(self._net, switch_count, hosts_per_switch, controller_ip, controller_port)
             topo.build_network()
         else:
-            self._net = Mininet(topo=topo)
+            self._net = Mininet(topo=topo, controller=None)
+            self._net.addController(ip=controller_ip, port=controller_port)
 
+        dumpNodeConnections(self._net.hosts)
         self._net.start()
 
     def ping(self):
