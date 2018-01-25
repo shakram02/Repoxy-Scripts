@@ -1,7 +1,10 @@
 from enum import Enum  # for enum34, or the stdlib version
+import os
 import json
 
-with open('config.json') as json_data_file:
+file_path = os.path.join(os.path.dirname(__file__))
+
+with open(os.path.join(file_path, 'config.json')) as json_data_file:
     _CONFIG = json.load(json_data_file)
 
 
@@ -15,7 +18,7 @@ class ConfigEntry(Enum):
 
 
 def test():
-    print(ConfigEntry.NetworkIp.value, get_entry(ConfigEntry.NetworkIp))
+    print(ConfigEntry.ProxyIp.value, get_entry(ConfigEntry.ProxyIp))
 
 
 if __name__ == "__main__":

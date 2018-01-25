@@ -66,9 +66,13 @@ class PoxRunner:
 
         for line in iter(self._process.stderr.readline, b''):
             out_line = line.decode('utf-8')
+            # Note: Output will not be printed after this function returns, we can create a daemon
+            # thread to keep printing the output if we need to
             print('{0}'.format(out_line))
 
             # TODO: this is a hack, yes I know. Please tell me if you find a better solution
+            # I'm basically scanning stdout for special keywords to know that the controller
+            # is ready
             if "Listening" in out_line:
                 if on_ready_callback is not None:
                     # Callback mode

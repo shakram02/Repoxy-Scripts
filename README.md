@@ -43,3 +43,7 @@ The `config.json` file placed in the `tests` directory must have the following f
   "proxy_ip": "x.x.x.x"
 }
 ```
+
+### Note
+The output of the controller to STD out will be trimmed once it's ready, that doesn't mean that the controller
+isn't running. and btw, I'm using a hack to know that the controller is ready. It'll need to be fixed soon.

@@ -7,7 +7,7 @@ from entities.networking.tcp_channel import TcpServer
 from entities.networking.utils import get_ip, colorize
 
 from entities.protocol import SERVER_PORT
-from settings import ConfigEntry, get_entry
+from connection_config import ConfigEntry, get_entry
 
 
 def test():
@@ -39,8 +39,8 @@ def test():
     # TODO run mininet here
     print(colorize("Controllers ready, Run mininet..."))
 
-    proxy_ip = "192.168.1.248"
-    proxy_port = 6833
+    proxy_ip = get_entry(ConfigEntry.ProxyIp)
+    proxy_port = get_entry(ConfigEntry.ProxyPort)
     machine = MininetMachine()
     machine.start(2, 2, proxy_ip, proxy_port)
     machine.ping()
