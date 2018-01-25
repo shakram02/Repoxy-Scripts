@@ -9,7 +9,10 @@ with open(os.path.join(file_path, 'config.json')) as json_data_file:
 
 
 def get_entry(entry_key):
-    return _CONFIG[entry_key.value]
+    if isinstance(entry_key, str):
+        return _CONFIG[entry_key]
+    else:
+        return _CONFIG[entry_key.value]
 
 
 class ConfigEntry(Enum):
