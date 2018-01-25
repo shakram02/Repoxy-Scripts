@@ -6,6 +6,7 @@ import signal
 import subprocess
 
 from entities.networking.utils import colorize
+from threading import Timer, Thread
 
 _SHUTDOWN_TIMEOUT = 3
 
@@ -34,13 +35,23 @@ class PoxRunner:
         try:
             print(colorize("Shutting down controller with [SIGINT],  waiting for termination..."))
             os.kill(self._process.pid, signal.SIGINT)
+
+            # Kill the process after 4 seconds if it didn't terminate, be a daemon, don't annoy us by
+            # staying alive
+            t = Timer(4, self.kill_controller)
+            t.daemon = True
+            t.start()
+
             self._process.wait()
+            t.cancel()  # Cancel if everything is fine
             print(colorize("Shut down controller done exit code {}".format(self._process.returncode)))
 
-            self._process = None
+            if self._process.returncode is not None:
+                self._process = None
         except Exception as e:
             print(colorize("An error occured while waiting the process to terminate:{}".format(e)))
-            self.kill_controller()
+            if self.is_alive():
+                self.kill_controller()
 
         print(colorize("Terminated"))
         # TODO confirm controller killed
@@ -55,7 +66,7 @@ class PoxRunner:
         print(colorize("Shutting down controller done exit code: {}".format(exit_code)))
 
     def is_alive(self):
-        return self._process is None
+        return self._process is not None
 
     def wait_till_ready(self, on_ready_callback=None):
         """
@@ -66,14 +77,15 @@ class PoxRunner:
 
         for line in iter(self._process.stderr.readline, b''):
             out_line = line.decode('utf-8')
-            # Note: Output will not be printed after this function returns, we can create a daemon
-            # thread to keep printing the output if we need to
-            print('{0}'.format(out_line))
+            print(out_line)
 
             # TODO: this is a hack, yes I know. Please tell me if you find a better solution
             # I'm basically scanning stdout for special keywords to know that the controller
             # is ready
             if "Listening" in out_line:
+                out_printer = Thread(target=self._keep_printing_output)
+                out_printer.daemon = True
+                out_printer.start()
                 if on_ready_callback is not None:
                     # Callback mode
                     on_ready_callback(out_line)
@@ -83,6 +95,13 @@ class PoxRunner:
 
             if "Error" in out_line:
                 return  # TODO report error or recover
+
+    def _keep_printing_output(self):
+        try:
+            for line in iter(self._process.stderr.readline, b''):
+                print(line.decode('utf-8'))
+        except AttributeError:
+            print(colorize("Process is now killed, will no longer print std stream outputs"))
 
 
 def on_ready(x):
