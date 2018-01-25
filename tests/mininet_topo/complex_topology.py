@@ -1,45 +1,58 @@
 #!/usr/bin/python
-from mininet.node import RemoteController
+from __future__ import print_function
+
+from entities.networking.utils import colorize
+from mininet.node import RemoteController, DefaultController
 
 
 class ComplexTopo:
+    """
+    mininet> py dumpNodeConnections(net.hosts)
+    h1 h1-eth0:s1-eth1
+    h3 h3-eth0:s2-eth1
+    h4 h4-eth0:s2-eth2
+    h2 h2-eth0:s1-eth2
+    """
+
     def __init__(self, net, switch_count, hosts_per_switch, controller_ip, controller_port):
         self.net = net
         self.switch_count = switch_count
         self.hosts_per_switch = hosts_per_switch
         self.controller = self._create_controller(controller_ip, controller_port)
+        self._switches = []
 
     def build_network(self):
-        hosts = self._create_hosts()
-        switches = self._create_switches()
-
         self.net.addController(self.controller)
-        self._connect_hosts_to_switches(hosts, switches)
-        self._connect_switches(switches)
-        self._connect_controller_to_switches(switches)
+        self._create_network()
+        self._connect_switches()
+        self._connect_controller_to_switches()
 
-    def _connect_hosts_to_switches(self, hosts, switches):
-        for switch in reversed(switches):
-            # Take the number of hosts of this switch out of the list
-            for i in range(self.hosts_per_switch):
-                self.net.addLink(switch, hosts.pop())
+    def _create_network(self, ):
+        for i in range(self.switch_count):
+            s = self.net.addSwitch('s{}'.format(i))
+            self._switches.append(s)
 
-    def _connect_switches(self, switches):
-        for i in range(len(switches) - 1):
-            self.net.addLink(switches[i], switches[i + 1])
+            for j in range(self.hosts_per_switch):
+                # This basically creates host with a seriesed numbers 0,1,2,...etc
+                # without restting the count in each loop
+                h = self.net.addHost('h{}'.format(j + (i * self.hosts_per_switch)))
+                print(colorize("Adding:{} to {}".format(h.name, s.name)))
+                self.net.addLink(s, h)
 
-    def _connect_controller_to_switches(self, switches):
-        for s in switches:
+    def _connect_switches(self):
+        for i in range(len(self._switches) - 1):
+            s = self._switches[i]
+            sn = self._switches[i + 1]
+            print(colorize("Connecting:{} to {}".format(s.name, sn.name)))
+            self.net.addLink(s, sn)
+
+    def _connect_controller_to_switches(self):
+        for s in self._switches:
             s.start([self.controller])
 
     @staticmethod
     def _create_controller(controller_ip, controller_port):
+        if controller_ip in ["localhost", "127.0.0.1", "0.0.0.0"]:
+            return DefaultController('c0', ip=controller_ip, port=controller_port)
+
         return RemoteController('c0', ip=controller_ip, port=controller_port)
-
-    def _create_switches(self):
-        """ Creates network switches """
-        return [self.net.addSwitch('s%s' % x) for x in range(self.switch_count)]
-
-    def _create_hosts(self):
-        """ Creates all hosts in network """
-        return [self.net.addHost('h%s' % x) for x in range(self.switch_count * self.hosts_per_switch)]
