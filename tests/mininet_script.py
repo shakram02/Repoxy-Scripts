@@ -6,16 +6,27 @@ from entities.networking.discovery_server import DiscoveryServer
 from entities.networking.tcp_channel import TcpServer
 from entities.networking.utils import get_ip, colorize
 
+from optparse import OptionParser
 from entities.protocol import SERVER_PORT
 from connection_config import ConfigEntry, get_entry
 
+parser = OptionParser()
+
+parser.add_option("-c", "--clients", action="store", type="int", dest="client_count", default=1,
+                  help="Number of controllers")
+
+parser.add_option("-d", "--devices", action="store", type="int", dest="device_count", default=3,
+                  help="Number of devices (hosts) attached to each switch")
+
+parser.add_option("-s", "--switches", action="store", type="int", dest="switch_count", default=2,
+                  help="Number of switches in network")
+
 
 def test():
-    try:
-        import sys
-        client_count = int(sys.argv[1])
-    except IndexError:
-        client_count = 1
+    (options, args) = parser.parse_args()
+    client_count = options.client_count
+    switch_count = options.switch_count
+    device_count = options.device_count
 
     print(colorize("Server started, waiting {} clients...".format(client_count)))
     server = DiscoveryServer(DISCOVERY_PORT, client_count)
@@ -36,13 +47,14 @@ def test():
         print(colorize("Waiting controller to be ready..."))
         tx.wait_ready()
 
-    # TODO run mininet here
-    print(colorize("Controllers ready, Run mininet..."))
-
+    print(colorize("Controllers ready, Running mininet..."))
     proxy_ip = get_entry(ConfigEntry.ProxyIp)
     proxy_port = get_entry(ConfigEntry.ProxyPort)
+
     machine = MininetMachine()
-    machine.start(2, 2, proxy_ip, proxy_port)
+
+    machine.start(switch_count, device_count, proxy_ip, int(proxy_port))
+
     machine.ping()
     machine.terminate()
     print("Mininet Done...")
