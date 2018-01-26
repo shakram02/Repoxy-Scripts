@@ -20,6 +20,7 @@ class ComplexTopo:
         self.hosts_per_switch = hosts_per_switch
         self.controller = self._create_controller(controller_ip, controller_port)
         self._switches = []
+        self._hosts = []
 
     def build_network(self):
         self.net.addController(self.controller)
@@ -36,6 +37,8 @@ class ComplexTopo:
                 # This basically creates host with a seriesed numbers 0,1,2,...etc
                 # without restting the count in each loop
                 h = self.net.addHost('h{}'.format(j + (i * self.hosts_per_switch)))
+                self._hosts.append(h)
+
                 print(colorize("Adding:{} to {}".format(h.name, s.name)))
                 self.net.addLink(s, h)
 
@@ -49,6 +52,9 @@ class ComplexTopo:
     def _connect_controller_to_switches(self):
         for s in self._switches:
             s.start([self.controller])
+
+    def get_hosts(self):
+        return self._hosts[:]
 
     @staticmethod
     def _create_controller(controller_ip, controller_port):

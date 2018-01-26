@@ -8,13 +8,12 @@ from mininet_topo.complex_topology import ComplexTopo
 
 class MininetMachine(object):
     def __init__(self):
-        # TODO: initialize discovery
         self._net = None
+        self._topo = None
 
-    def start(self, switch_count, hosts_per_switch, controller_ip, controller_port, topo=None):
+    def start(self, switch_count, hosts_per_switch, controller_ip, controller_port):
         """
         Creates mininet network
-        :param topo: Network topology for mininet
         :param switch_count: Number of switches in network
         :param hosts_per_switch: Hosts per every switch
         :param controller_ip: Controller IP
@@ -24,35 +23,25 @@ class MininetMachine(object):
         self._clean()
         setLogLevel('info')
 
-        if topo is None:
-            self._net = Mininet()
-            topo = ComplexTopo(self._net, switch_count, hosts_per_switch, controller_ip, controller_port)
-            topo.build_network()
-        else:
-            self._net = Mininet(topo=topo, controller=None)
-            self._net.addController(ip=controller_ip, port=controller_port)
+        self._net = Mininet()
+        self._topo = ComplexTopo(self._net, switch_count, hosts_per_switch, controller_ip, controller_port)
+        self._topo.build_network()
 
         dumpNodeConnections(self._net.hosts)
         self._net.start()
 
-    def ping(self):
+    def ping_all(self):
         self._net.pingAll()
 
     def terminate(self):
         self._net.stop()
 
+    def ping_hosts(self, hosts):
+        return self._net.ping(hosts)
+
+    def get_hosts(self):
+        return self._topo.get_hosts()
+
     @staticmethod
     def _clean():
         clean.cleanup()
-
-
-def test():
-    machine = MininetMachine()
-    machine.start(2, 1, "localhost", 6633, TreeTopo(depth=1, fanout=2))
-    machine.ping()
-    machine.terminate()
-    print("Done...")
-
-
-if __name__ == "__main__":
-    test()

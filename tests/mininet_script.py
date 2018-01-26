@@ -22,12 +22,22 @@ parser.add_option("-d", "--devices", action="store", type="int", dest="device_co
 parser.add_option("-s", "--switches", action="store", type="int", dest="switch_count", default=2,
                   help="Number of switches in network")
 
+parser.add_option("-i", "--ip", action="store", type="string", dest="proxy_ip",
+                  default=get_entry(ConfigEntry.ProxyIp),
+                  help="Mininet controller (proxy) IP, default val in config.json")
+
+parser.add_option("-p", "--port", action="store", type="string", dest="proxy_port",
+                  default=get_entry(ConfigEntry.ProxyPort),
+                  help="Mininet controller (proxy) Port, default val in config.json")
+
 
 def test():
     (options, args) = parser.parse_args()
     client_count = options.client_count
     switch_count = options.switch_count
     device_count = options.device_count
+    proxy_ip = options.proxy_ip
+    proxy_port = options.proxy_port
 
     system('sudo mn -c > /dev/null 2>&1')  # Clean old mininet runs without showing output to screen.
 
@@ -51,14 +61,19 @@ def test():
         tx.wait_ready()
 
     print(colorize("Controllers ready, Running mininet..."))
-    proxy_ip = get_entry(ConfigEntry.ProxyIp)
-    proxy_port = get_entry(ConfigEntry.ProxyPort)
-
     machine = MininetMachine()
+
     print(colorize("Mininet connecting to {}:{}".format(proxy_ip, proxy_port)))
     machine.start(switch_count, device_count, proxy_ip, int(proxy_port))
 
-    machine.ping()
+    hosts = machine.get_hosts()
+    for host in hosts:
+        for dest in hosts:
+            if host == dest:
+                continue
+            # Ping pair
+            machine.ping_hosts([host, dest])
+
     machine.terminate()
     print("Mininet Done...")
 
