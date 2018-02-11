@@ -27,10 +27,14 @@ class CbenchResult(object):
         return self.__str__()
 
 
-def run(ip, port, loops, switches, warmup=2):
-    # TODO put this in a class
-    def print_dot(death_event):
-        while not death_event.is_set():
+class DotSpinner(object):
+
+    def __init__(self):
+        self._t = None
+        self._pill = Event()
+
+    def _print_dot(self):
+        while not self._pill.is_set():
             sys.stdout.write(".")
             sys.stdout.flush()
             sleep(0.5)
@@ -38,20 +42,27 @@ def run(ip, port, loops, switches, warmup=2):
         sys.stdout.write('\n')
         sys.stdout.flush()
 
-    death_pill = Event()
-    t = Thread(target=print_dot, args=(death_pill,))
-    t.daemon = True
-    t.start()
+    def start(self):
+        self._t = Thread(target=self._print_dot)
+        self._t.daemon = True
+        self._t.start()
+
+    def stop(self):
+        self._pill.set()
+        self._t.join()
+
+
+def run(ip, port, loops, switches, warmup=2):
+    spinner = DotSpinner()
 
     command = str("cbench -c {} -p {} -D 2000 -s {} -w {} -l {}".format(ip, port, switches, warmup, loops))
     process = subprocess.Popen(shlex.split(command), bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
+    spinner.start()
     result = None
 
     # Put reader on another thread
     for line in iter(process.stdout.readline, b''):
         out_line = line.decode('utf-8')
-        print(".", end='')
 
         # RESULT: 1 switches 3 tests min/max/avg/stdev = 452.97/514.00/481.99/25.00 responses/s
         if "RESULT" not in out_line:
@@ -62,11 +73,10 @@ def run(ip, port, loops, switches, warmup=2):
         break
 
     process.wait()
-    death_pill.set()
-    t.join()
+    spinner.stop()
 
     if result is None:
-        # Convert the result to a human readable string.
+        # Convert the error log to a human readable string.
         return "".join([x.decode() for x in process.stderr.readlines()])
 
     return CbenchResult(result)
