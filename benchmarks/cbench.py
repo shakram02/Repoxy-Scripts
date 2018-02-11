@@ -1,7 +1,9 @@
-import os
+from time import sleep
+from threading import Thread, Event
 import shlex
 import re
 import subprocess
+import sys
 
 BLUE_BACKGROUND_BRIGHT = "\033[0;104m"
 WHITE_BOLD = "\033[1;37m"
@@ -26,8 +28,24 @@ class CbenchResult(object):
 
 
 def run(ip, port, loops, switches, warmup=2):
+    # TODO put this in a class
+    def print_dot(death_event):
+        while not death_event.is_set():
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            sleep(0.5)
+
+        sys.stdout.write('\n')
+        sys.stdout.flush()
+
+    death_pill = Event()
+    t = Thread(target=print_dot, args=(death_pill,))
+    t.daemon = True
+    t.start()
+
     command = str("cbench -c {} -p {} -D 2000 -s {} -w {} -l {}".format(ip, port, switches, warmup, loops))
     process = subprocess.Popen(shlex.split(command), bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     result = None
 
     # Put reader on another thread
@@ -44,6 +62,8 @@ def run(ip, port, loops, switches, warmup=2):
         break
 
     process.wait()
+    death_pill.set()
+    t.join()
 
     if result is None:
         # Convert the result to a human readable string.
