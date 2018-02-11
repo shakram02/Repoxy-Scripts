@@ -11,6 +11,7 @@ logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 from random import randrange
 import time
+from scapy.all import *
 
 
 def sourceIPgen():
@@ -39,13 +40,15 @@ def main():
 # send the generated IPs
 def mymain():
     # getting the ip address to send attack packets
-    dstIP = sys.argv[1:]
-    print(dstIP)
+    # dstIP = sys.argv[1:]
+    # print(dstIP)
+    dstIP = "192.198.1.244"
     src_port = 80
-    dst_port = 1
+    dst_port = 6834
 
     # open interface eth0 to send packets
-    interface = popen('ifconfig | awk \'/eth0/ {print $1}\'').read()
+    # interface = popen('ifconfig | awk \'/enp5s0/ {print $1}\'').read()
+    interface = 'enp5s0'
 
     for i in range(500):
         # form the packet
